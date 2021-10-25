@@ -92,8 +92,8 @@ function ui_container_recalculate(container){
 		y2 = parent.y1 + y2_anchor + y2_relative*ysc;
 		width = x2 - x1;
 		height = y2 - y1;
-		x = width/2;
-		y = height/2;
+		x = x1+width/2;
+		y = y1+height/2;
 		ui_container_visible(self,visible1);
 	}
 	var p = array_length(container.containers);
