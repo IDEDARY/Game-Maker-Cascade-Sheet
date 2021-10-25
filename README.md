@@ -1,6 +1,8 @@
 # GMCS
  UI Cascading sheet for GameMaker Studio 2.
  
+ Demo HERE: https://idedary.itch.io/gmcs
+ 
  This is a substitute for a completely absent UI system in GameMaker. The library takes inspiration from HTML-CSS.
  The UI system contains:
   - Screen
