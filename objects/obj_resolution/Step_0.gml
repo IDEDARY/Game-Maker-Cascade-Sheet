@@ -36,8 +36,7 @@ if((window_width != global.screen_width or window_height != global.screen_height
 	camera_set_view_size(view_camera[0], global.screen_width, global.screen_height);
 	
 	//=============================================================================================================
-	//Recalculation of my screen when window is resized
-	with(obj_run){ui_screen_recalculate(myscreen);}
+	script_called_windowResize();
 	//=============================================================================================================
 	
 }

@@ -1,0 +1,1 @@
+sprite_index = buttonLong_grey_pressed;

@@ -2,11 +2,11 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "GMCS",
-    "path": "folders/GMCS.yy",
+    "name": "Calls",
+    "path": "folders/Demo/Calls.yy",
   },
   "resourceVersion": "1.0",
-  "name": "ui_scripts",
+  "name": "script_called_windowResize",
   "tags": [],
   "resourceType": "GMScript",
 }
