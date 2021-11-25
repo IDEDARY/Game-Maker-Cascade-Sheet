@@ -2,7 +2,7 @@
   "resources": [
     {"id":{"name":"b_middle","path":"sprites/b_middle/b_middle.yy",},"order":4,},
     {"id":{"name":"obj_resolution","path":"objects/obj_resolution/obj_resolution.yy",},"order":0,},
-    {"id":{"name":"ui_scripts","path":"scripts/ui_scripts/ui_scripts.yy",},"order":3,},
+    {"id":{"name":"GMCS","path":"scripts/GMCS/GMCS.yy",},"order":3,},
     {"id":{"name":"panel_blue","path":"sprites/panel_blue/panel_blue.yy",},"order":3,},
     {"id":{"name":"b_back","path":"sprites/b_back/b_back.yy",},"order":5,},
     {"id":{"name":"panel_brown","path":"sprites/panel_brown/panel_brown.yy",},"order":7,},

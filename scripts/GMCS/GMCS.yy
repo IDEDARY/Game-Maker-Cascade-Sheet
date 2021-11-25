@@ -6,7 +6,7 @@
     "path": "folders/GMCS.yy",
   },
   "resourceVersion": "1.0",
-  "name": "ui_scripts",
+  "name": "GMCS",
   "tags": [],
   "resourceType": "GMScript",
 }
