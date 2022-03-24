@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"cursorSword_silver","path":"sprites/cursorSword_silver/cursorSword_silver.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "cursorSword_silver",
     "tags": [],
     "resourceType": "GMSequence",

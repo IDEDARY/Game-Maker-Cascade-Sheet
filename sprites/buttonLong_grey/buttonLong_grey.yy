@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"buttonLong_grey","path":"sprites/buttonLong_grey/buttonLong_grey.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "buttonLong_grey",
     "tags": [],
     "resourceType": "GMSequence",

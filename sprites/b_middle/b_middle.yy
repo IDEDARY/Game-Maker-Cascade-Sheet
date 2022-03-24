@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"b_middle","path":"sprites/b_middle/b_middle.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "b_middle",
     "tags": [],
     "resourceType": "GMSequence",

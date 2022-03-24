@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"b_back","path":"sprites/b_back/b_back.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "b_back",
     "tags": [],
     "resourceType": "GMSequence",

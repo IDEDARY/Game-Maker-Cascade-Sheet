@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"panel_brown","path":"sprites/panel_brown/panel_brown.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "panel_brown",
     "tags": [],
     "resourceType": "GMSequence",

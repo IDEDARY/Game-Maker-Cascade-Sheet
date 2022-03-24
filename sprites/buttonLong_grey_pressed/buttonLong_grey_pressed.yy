@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"buttonLong_grey_pressed","path":"sprites/buttonLong_grey_pressed/buttonLong_grey_pressed.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "buttonLong_grey_pressed",
     "tags": [],
     "resourceType": "GMSequence",

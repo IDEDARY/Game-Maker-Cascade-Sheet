@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"b_front","path":"sprites/b_front/b_front.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "b_front",
     "tags": [],
     "resourceType": "GMSequence",
