@@ -6,7 +6,7 @@
     "path": "folders/Basic/GMCS.yy",
   },
   "resourceVersion": "1.0",
-  "name": "GMCS",
+  "name": "GMCS_buttons",
   "tags": [],
   "resourceType": "GMScript",
 }

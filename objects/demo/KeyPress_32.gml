@@ -1,0 +1,1 @@
+_screen._method_setVisible(!_screen._info_visible);

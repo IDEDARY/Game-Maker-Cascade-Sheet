@@ -1,0 +1,1 @@
+global.gmcs._method_process_recalculate();

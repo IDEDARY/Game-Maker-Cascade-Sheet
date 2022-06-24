@@ -1,0 +1,1 @@
+draw_sprite_ext(ui_element.sprite[0],0,x,y,x_scale,y_scale,0,image_blend,1);
