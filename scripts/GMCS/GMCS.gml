@@ -33,29 +33,6 @@
 //===================================================== DECLARE FUNCTIONS ==============================================================
 #region FUNC
 //These are inner working functions that are not supposed to be touched by user. TLDR: Don't touch anything that has in name "func" = inner function (applies to arrays and structs as well)
-enum UI {
-	//Anchor positions (used when scaling type_solid container)
-	anchor_center,
-	anchor_bottom,
-	anchor_top,
-	anchor_left,
-	anchor_right,
-	//Method of scaling (used when scaling type_solid container or in custom draw functions)
-	scale_fit,												//Makes the container "fit" inside of another container
-	scale_fill,												//Makes the container "fill" everthing of another container
-	scale_deform,											//Stretches the container to "fill" everthing of another container
-	//Type of the container or element - will define how things behave.
-	type_screen,											//Container only - container of the size of the screen
-	type_relative,											//Used in containers and elements
-	type_solid,												//Used in containers and elements
-	type_window,											//Container only - container behaves as drag-able window //Only solid and can be draggable outside and cannot on/off
-	//Style of the container - poor choice will result in wastefull processing time.
-	style_custom,											//The baking is turned off and you supply the image.
-	style_synthetic,										//The baking is turned off but all style elements are drawn separately and dynamically.
-	style_cached,											//Baked style into sprite every time container is resized (Use it on containers that DON'T percantage size often).
-	style_baked,											//Baked style into sprite when created or called by user (Use it on containers that DON'T percantage size often).
-	style_amphibious,										//Style that dynamically changes between baking and sythetizing.
-};
 
 function ui_func_memory_visible_add(container){
 	var index = array_length(ui.global_inventory.active_screens);

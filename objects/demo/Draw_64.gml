@@ -1,1 +1,2 @@
-draw_container(_screen);
+//gmcs_draw_container(conny);
+gmcs_draw_visible()

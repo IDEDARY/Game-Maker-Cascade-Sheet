@@ -1,6 +1,66 @@
+//======================================================================================================================================
+//======================================================================================================================================
+//--------------------------------------- GameMakerCascadeSheet (GMCS) by Dominik Kaspar -----------------------------------------------
+//
+// Lightweight replacement for completely absent UI system in GMS2. Handles resolution scaling, user-friendly container defining,
+// animations, custom styles and image baking, grid box generation and more!
+//
+// I focused to make this library as optimized as possible, but with all that fancy stuff and animations, it's not that easy.
+// If you have any questions or advices for improvements, reach out to me on Discord! 1DEDARY#1307
+//
+// Github repository: https://github.com/IDEDARY/Game-Maker-Cascade-Sheet
+// Published under MIT license.
+// Version 6.0
+//
+//======================================================================================================================================
+//===================================================== DEPENDENCIES ===================================================================
+#region DEPENDENCIES
+// Everything that needs to be done so this can work.
+// -----
+// 1) Game options > allow window resize == true
+// 2) Game options > scaling == full scale (optional, but it looks better)
+// 3) Game options > allow fullscreen switching == true (optional)
+// 4) global.screen_width & global.screen_height needs to be declared before working with GMCS. It can be solved by just dragging GMCS_objResolution
+//    to the room, but if you use your own object to manage window scaling and viewports, this needs to be done.
+//-----
+#endregion
+//======================================================================================================================================
+//===================================================== DECLARE FUNCTIONS ==============================================================
+#region FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////////////////
 //======================================================================================//
-#region Constructors
+#region ENUMS
+//These are inner working functions that are not supposed to be touched by user. TLDR: Don't touch anything that has in name "func" = inner function (applies to arrays and structs as well)
+enum UI {
+	//Anchor positions (used when scaling type_solid container)
+	anchor_center,
+	anchor_bottom,
+	anchor_top,
+	anchor_left,
+	anchor_right,
+	//Method of scaling (used when scaling type_solid container or in custom draw functions)
+	scale_fit,												//Makes the container "fit" inside of another container
+	scale_fill,												//Makes the container "fill" everthing of another container
+	scale_deform,											//Stretches the container to "fill" everthing of another container
+	//Type of the container or element - will define how things behave.
+	type_screen,											//Container only - container of the size of the screen
+	type_relative,											//Used in containers and elements
+	type_solid,												//Used in containers and elements
+	type_window,											//Container only - container behaves as drag-able window //Only solid and can be draggable outside and cannot on/off
+	//Style of the container - poor choice will result in wastefull processing time.
+	style_custom,											//The baking is turned off and you supply the image.
+	style_synthetic,										//The baking is turned off but all style elements are drawn separately and dynamically.
+	style_cached,											//Baked style into sprite every time container is resized (Use it on containers that DON'T percantage size often).
+	style_baked,											//Baked style into sprite when created or called by user (Use it on containers that DON'T percantage size often).
+	style_amphibious,										//Style that dynamically changes between baking and sythetizing.
+};
+#endregion
+//======================================================================================//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//======================================================================================//
+#region CONSTRUCTORS
 //////////////////////////////////////////////////////////////////////////////////////////
 	/// @function gmcs_init();
 	/// @description Creates a GMCS handler object.
@@ -42,9 +102,9 @@
 		};
 	};};
 //////////////////////////////////////////////////////////////////////////////////////////
-	/// @function screen();
+	/// @function gmcs_screen();
 	/// @description Creates a new GUI component.
-	function screen() constructor {
+	function gmcs_screen() constructor {
 		//-------------------------------
 		//--INFO--
 		_info_width = global.screen_width;
@@ -73,7 +133,7 @@
 		    var i = 0;
 			var found = -1;
 		    repeat(p) {
-		        if(global.gmcs._memory_visibles = self){found = i;break;};
+		        if(global.gmcs._memory_visibles[i] = self){found = i;break;};
 		        i++;
 		    };
 			if(_info_visible = 1){
@@ -99,12 +159,12 @@
 		global.gmcs._memory_screens[array_length(global.gmcs._memory_screens)] = self;
 	};
 //////////////////////////////////////////////////////////////////////////////////////////
-	/// @function relative_container(parent, solid_positions, relative_positions);
+	/// @function gmcs_relative_container(parent, solid_positions, relative_positions);
 	/// @param {struct} parent
 	/// @param {array} solid_positions
 	/// @param {array} relative_positions
 	/// @description Creates a new GUI component.
-	function relative_container(__parent, __pos_solid, __pos_relative) constructor {
+	function gmcs_relative_container(__parent, __pos_solid, __pos_relative) constructor {
 		//-------------------------------
 		//--INFO--
 		_info_width = 0;
@@ -174,13 +234,13 @@
 		_info_parent._memory_containers[array_length(_info_parent._memory_containers)] = self;
 	};
 //////////////////////////////////////////////////////////////////////////////////////////
-	/// @function solid_container(parent, size, anchor, scale_type);
+	/// @function gmcs_solid_container(parent, size, anchor, scale_type);
 	/// @param {struct} parent
 	/// @param {array} size
 	/// @param {array} anchor
 	/// @param {enum} scale_type
 	/// @description Creates a new GUI component.
-	function solid_container(__parent, __size, __anchor, __scale_type) constructor {
+	function gmcs_solid_container(__parent, __size, __anchor, __scale_type) constructor {
 		//-------------------------------
 		//--INFO--
 		_info_width = 0;
@@ -283,20 +343,71 @@
 //======================================================================================//
 //////////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//======================================================================================//
+#region SCRIPT CALLS
+//////////////////////////////////////////////////////////////////////////////////////////
+	/// @function gmcs_mark_recalculate_active();
+	/// @description This command will mark all active screens for recalculation.
+	function gmcs_mark_recalculate_active(){
+	var p = array_length(global.gmcs._memory_visibles);
+	var i = 0;
+	repeat(p) {
+		global.gmcs._method_mark_recalculate(global.gmcs._memory_visibles[i]);
+		i++;
+	};
+};
+#endregion
+//======================================================================================//
+//////////////////////////////////////////////////////////////////////////////////////////
 
-function draw_container(container) {
-	if(container._info_visible){draw_rectangle(container._info_position[0],container._info_position[1],container._info_position[2],container._info_position[3],1);}
-    //LOOP------------------------------------------
-    var n = array_length(container._memory_containers);
-    var i = 0;
-    repeat(n) {
-        draw_container(container._memory_containers[i]);
-        i++;
-    };
-};
-function gmcs_getscale_fill(container, width, height) {
-    return max(container._info_width/width, container._info_height/height);
-};
-function gmcs_getscale_fit(container, width, height) {
-    return min(container._info_width/width, container._info_height/height);
-};
+//////////////////////////////////////////////////////////////////////////////////////////
+//======================================================================================//
+#region DRAW CALLS
+//////////////////////////////////////////////////////////////////////////////////////////
+	/// @function gmcs_draw_container(container);
+	/// @param {struct} container
+	/// @description Place this in DRAW GUI, it will draw container with all its components.
+	function gmcs_draw_container(__container) {
+		if(__container._info_visible){draw_rectangle(__container._info_position[0],__container._info_position[1],__container._info_position[2],__container._info_position[3],1);}
+	    //LOOP------------------------------------------
+	    var n = array_length(__container._memory_containers);
+	    var i = 0;
+	    repeat(n) {
+	        gmcs_draw_container(__container._memory_containers[i]);
+	        i++;
+	    };
+	};
+//////////////////////////////////////////////////////////////////////////////////////////
+	/// @function gmcs_draw_visible();
+	/// @description Place this in DRAW GUI, it will draw container with all its components.
+	function gmcs_draw_visible() {
+		var p = array_length(global.gmcs._memory_visibles);
+		var i = 0;
+		repeat(p) {
+			gmcs_draw_container(global.gmcs._memory_visibles[i]);
+			i++;
+		};
+	};
+//////////////////////////////////////////////////////////////////////////////////////////
+	/// @function gmcs_getscale_fill(container, width, height);
+	/// @param {struct} container
+	/// @param {struct} width
+	/// @param {struct} height
+	/// @description Returns scale to fill the container
+	function gmcs_getscale_fill(__container, __width, __height) {
+	    return max(__container._info_width/__width, __container._info_height/__height);
+	};
+//////////////////////////////////////////////////////////////////////////////////////////
+	/// @function gmcs_getscale_fit(container, width, height);
+	/// @param {struct} container
+	/// @param {struct} width
+	/// @param {struct} height
+	/// @description Returns scale to fit the container
+	function gmcs_getscale_fit(__container, __width, __height) {
+	    return min(__container._info_width/__width, __container._info_height/__height);
+	};
+#endregion
+//======================================================================================//
+//////////////////////////////////////////////////////////////////////////////////////////
+#endregion

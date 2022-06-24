@@ -9,7 +9,6 @@ if(global.screen_type = 2){window_set_size(global.screen_width,global.screen_hei
 camera_set_view_size(view_camera[view_id], global.screen_width, global.screen_height);
 //-------------------------
 //Trigger GMCS recalculation process
-//ui_all_recalculate();
-//global.gmcs._method_mark_recalculate(demo._screen);
+gmcs_mark_recalculate_active();
 //-------------------------
 #endregion
