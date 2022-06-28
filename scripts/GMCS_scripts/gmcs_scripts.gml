@@ -67,14 +67,20 @@ enum UI {
 	function gmcs_init() {
 		global.gmcs = {};
 		with(global.gmcs){
+		manager = instance_create_depth(0,0,-300,GMCS_objManager,{
+			canvas_index : 0,
+			canvas : [[]],
+		});
 		//-------------------------------
 		//--MEMORY--
 		_memory_screens = [];
 		_memory_visibles = [];
+		_memory_interactives = [];
 		_callstack_recalculate = [];
 		//-------------------------------
 		//--METHODS--
 		_method_mark_recalculate = function(__container){
+			//This will mark a container to be recalculated
 			_callstack_recalculate[array_length(_callstack_recalculate)] = __container;
 			var n = array_length(__container._memory_containers);
 		    var i = 0;
@@ -83,7 +89,30 @@ enum UI {
 		        i++;
 		    };
 		};
+		_method_mark_render = function(){
+			//This will push all containers from active screens onto the render array
+			manager.canvas_index = 0;
+			array_delete(manager.canvas,0,array_length(manager.canvas));
+			var n = array_length(_memory_visibles);
+			var i = 0;
+			//Loop through all visibles
+			repeat(n) {
+				var nn = array_length(_memory_visibles[i]._memory_stash_render);
+				var ii = 0;
+				repeat(nn) {
+					while(manager.canvas_index <= _memory_visibles[i]._memory_stash_render[ii]._info_layer){
+						array_push(manager.canvas,[]);
+						manager.canvas_index = array_length(manager.canvas);
+					};
+					manager.canvas[_memory_visibles[i]._memory_stash_render[ii]._info_layer][array_length(manager.canvas[_memory_visibles[i]._memory_stash_render[ii]._info_layer])] = _memory_visibles[i]._memory_stash_render[ii];
+				ii++;
+				};
+			i++;
+			};
+			
+		};
 		_method_process_recalculate = function(){
+			//This will recalculate all marked containers
 			var n = array_length(_callstack_recalculate);
 		    var i = 0;
 		    repeat(n) {
@@ -100,6 +129,37 @@ enum UI {
 		    };
 			array_delete(_callstack_recalculate,0,array_length(_callstack_recalculate));
 		};
+		//////////////////////////////////////////////////////////////////////////////////////////
+		
+		_constructor_newStyle = function() constructor {
+			_sprite = surface_create(1,1);
+			_sprite_scale = 1;
+			_sprite_reference = [noone, noone, noone];
+			_sprite_decoration = [];
+			_font = noone;
+			_font_blend = c_white;
+			_font_alpha = 1;
+			
+			_spriteReturn_deco_offset = [];
+			_spriteReturn_deco_size = [];
+		};
+		
+		_constructor_newStyleDecoration = function() constructor {
+			_sprite = noone;
+			_x_relative = 0;
+			_y_relative = 0;
+			_x_solid = 0;
+			_y_solid = 0;
+			_x_scale = 1;
+			_y_scale = 1;
+			_x_mirror = 1;
+			_y_mirror = 1;
+			_true_mirror = 1; //Should the direction of the elements be also mirrored?
+			_rotation = 0;
+			_blend = c_white;
+			_alpha = 1;
+
+		};
 	};};
 //////////////////////////////////////////////////////////////////////////////////////////
 	/// @function gmcs_screen();
@@ -115,12 +175,16 @@ enum UI {
 		_info_layer = 0;
 		_info_type = UI.type_screen;
 		_info_visible = 0;
+		_info_screen = self;
 		//-------------------------------
 		//--MEMORY--
 		_memory_containers = [];
+		_memory_stash_render = [];
+		_memory_stash_interactive = [];
 		//-------------------------------
 		//--METHODS--
 		static _method_recalculate = function(){
+			//This will recalculate the container
 			_info_width = global.screen_width;
 			_info_height = global.screen_height;
 			_info_position = [0,0,global.screen_width,global.screen_height];
@@ -128,11 +192,12 @@ enum UI {
 			_info_y = global.screen_height/2;
 		};
 		static _method_setVisible = function(__visibility){
+			//This will set visibility of a container
 			_info_visible = __visibility;
-			var p = array_length(global.gmcs._memory_visibles);
+			var n = array_length(global.gmcs._memory_visibles);
 		    var i = 0;
 			var found = -1;
-		    repeat(p) {
+		    repeat(n) {
 		        if(global.gmcs._memory_visibles[i] = self){found = i;break;};
 		        i++;
 		    };
@@ -142,9 +207,9 @@ enum UI {
 				if(found != -1){array_delete(global.gmcs._memory_visibles,found,1);};
 				global.gmcs._method_mark_recalculate(self);
 			};
-			var p = array_length(_memory_containers);
+			var n = array_length(_memory_containers);
 	        var i = 0;
-	        repeat(p) {
+	        repeat(n) {
 	            _memory_containers[i]._method_setVisible(__visibility);
 	            i++;
 	        };
@@ -159,12 +224,12 @@ enum UI {
 		global.gmcs._memory_screens[array_length(global.gmcs._memory_screens)] = self;
 	};
 //////////////////////////////////////////////////////////////////////////////////////////
-	/// @function gmcs_relative_container(parent, solid_positions, relative_positions);
+	/// @function gmcs_container_relative(parent, solid_positions, relative_positions);
 	/// @param {struct} parent
 	/// @param {array} solid_positions
 	/// @param {array} relative_positions
 	/// @description Creates a new GUI component.
-	function gmcs_relative_container(__parent, __pos_solid, __pos_relative) constructor {
+	function gmcs_container_relative(__parent, __pos_solid, __pos_relative) constructor {
 		//-------------------------------
 		//--INFO--
 		_info_width = 0;
@@ -173,6 +238,7 @@ enum UI {
 		_info_x = 0;
 		_info_y = 0;
 		_info_parent = __parent;
+		_info_screen = __parent._info_screen;
 		_info_layer = _info_parent._info_layer + 1;
 		_info_type = UI.type_relative;
 		_info_visible = 1;
@@ -182,7 +248,7 @@ enum UI {
 		_memory_containers = [];
 		_memory_positions = [[__pos_solid,__pos_relative]];
 		//_memory_animation = [];
-		//_memory_styles = [];
+		_memory_styles = [];
 		//-------------------------------
 		//--ANIMATION--
 		_animation_positionIndex = [0,0];
@@ -190,8 +256,9 @@ enum UI {
 		//-------------------------------
 		//--METHODS--
 		static _method_recalculate = function(){
-			var xsc = (_info_parent._info_width) / 1000; //Takes current real width
-			var ysc = (_info_parent._info_height) / 1000; //Takes current real height
+			//This will recalculate the container
+			var xsc = (_info_parent._info_width) / 1000;
+			var ysc = (_info_parent._info_height) / 1000;
 			//Use matrix next time
 			var x1_vector_1 = _memory_positions[_animation_positionIndex[0]][0][0] + _memory_positions[_animation_positionIndex[0]][1][0] * xsc;
 			var y1_vector_1 = _memory_positions[_animation_positionIndex[0]][0][1] + _memory_positions[_animation_positionIndex[0]][1][1] * ysc;
@@ -214,16 +281,61 @@ enum UI {
 			_info_y = _info_position[1]+_info_height/2;
 		};
 		static _method_setVisible = function(__visibility){
+			//This will set visibility of a container
 			_info_selfVisible = __visibility;
 			_info_visible = _info_parent._info_visible && _info_selfVisible;
-			if(_info_visible = 1){global.gmcs._method_mark_recalculate(self);};
-			var p = array_length(_memory_containers);
+			if(_info_visible = 1){
+				global.gmcs._method_mark_recalculate(self);
+				if(array_length(_memory_styles) != 0){
+					var found = false;
+					var i = 0; var n = array_length(_info_screen._memory_stash_render);
+					repeat(n){
+						if(_info_screen._memory_stash_render[i] = self){found = true;break;};
+					i++;
+					};
+					if(found = false){_info_screen._memory_stash_render[array_length(_info_screen._memory_stash_render)] = self;};
+				};
+			}else{
+				if(array_length(_memory_styles) != 0){
+					var found = false;
+					var i = 0; var n = array_length(_info_screen._memory_stash_render);
+					repeat(n){
+						if(_info_screen._memory_stash_render[i] = self){found = true;break;};
+					i++;
+					};
+					if(found = true){array_delete(_info_screen._memory_stash_render,i,1);};
+				};
+			};
+			var n = array_length(_memory_containers);
 	        var i = 0;
-	        repeat(p) {
+	        repeat(n) {
 	            _memory_containers[i]._method_setVisible(__visibility);
 	            i++;
 	        };
 		};
+		static _method_addStyle = function(_style = {}) {
+			_memory_styles[array_length(_memory_styles)] = {
+				_sprite : surface_create(1,1),
+				_sprite_scale : 1,
+				_sprite_reference : [noone, noone, noone],
+				_sprite_decoration : [],
+				_font : noone,
+				_font_blend : c_white,
+				_font_alpha : 1,
+			
+				_spriteReturn_deco_offset : [],
+				_spriteReturn_deco_size : [],
+			};
+			var s = _memory_styles[array_length(_memory_styles)-1];
+			if(variable_struct_exists(_style,"_sprite")){s._sprite = _style._sprite;};
+			if(variable_struct_exists(_style,"_sprite_scale")){s._sprite_scale = _style._sprite_scale;};
+			if(variable_struct_exists(_style,"_sprite_reference")){s._sprite_reference = _style._sprite_reference;};
+			if(variable_struct_exists(_style,"_sprite_decoration")){s._sprite_decoration = _style._sprite_decoration;};
+			if(variable_struct_exists(_style,"_font")){s._font = _style._font;};
+			if(variable_struct_exists(_style,"_font_blend")){s._font_blend = _style._font_blend;};
+			if(variable_struct_exists(_style,"_font_alpha")){s._font_alpha = _style._font_alpha;};	
+		};
+		
 		_method_recalculate();
 		_method_setVisible(_info_visible);
 		//-------------------------------
@@ -234,13 +346,13 @@ enum UI {
 		_info_parent._memory_containers[array_length(_info_parent._memory_containers)] = self;
 	};
 //////////////////////////////////////////////////////////////////////////////////////////
-	/// @function gmcs_solid_container(parent, size, anchor, scale_type);
+	/// @function gmcs_container_solid(parent, size, anchor, scale_type);
 	/// @param {struct} parent
 	/// @param {array} size
 	/// @param {array} anchor
 	/// @param {enum} scale_type
 	/// @description Creates a new GUI component.
-	function gmcs_solid_container(__parent, __size, __anchor, __scale_type) constructor {
+	function gmcs_container_solid(__parent, __size, __anchor, __scale_type) constructor {
 		//-------------------------------
 		//--INFO--
 		_info_width = 0;
@@ -249,6 +361,7 @@ enum UI {
 		_info_x = 0;
 		_info_y = 0;
 		_info_parent = __parent;
+		_info_screen = __parent._info_screen;
 		_info_layer = _info_parent._info_layer + 1;
 		_info_type = UI.type_solid;
 		_info_visible = 1;
@@ -258,7 +371,7 @@ enum UI {
 		_memory_containers = [];
 		_memory_positions = [[__size,__anchor,[1,1],__scale_type]];
 		//_memory_animation = [];
-		//_memory_styles = [];
+		_memory_styles = [];
 		//-------------------------------
 		//--ANIMATION--
 		_animation_positionIndex = [0,0];
@@ -266,6 +379,7 @@ enum UI {
 		//-------------------------------
 		//--METHODS--
 		static _method_recalculate = function(){
+			//This will recalculate the container
 			var type_1 = _memory_positions[_animation_positionIndex[0]][3];
 			var width_1 = _memory_positions[_animation_positionIndex[0]][0][0];
 			var height_1 = _memory_positions[_animation_positionIndex[0]][0][1];
@@ -320,12 +434,34 @@ enum UI {
 			};
 		};
 		static _method_setVisible = function(__visibility){
+			//This will set visibility of a container
 			_info_selfVisible = __visibility;
 			_info_visible = _info_parent._info_visible && _info_selfVisible;
-			if(_info_visible = 1){global.gmcs._method_mark_recalculate(self);};
-			var p = array_length(_memory_containers);
+			if(_info_visible = 1){
+				global.gmcs._method_mark_recalculate(self);
+				if(array_length(_memory_styles) != 0){
+					var found = false;
+					var i = 0; var n = array_length(_info_screen._memory_stash_render);
+					repeat(n){
+						if(_info_screen._memory_stash_render[i] = self){found = true;break;};
+					i++;
+					};
+					if(found = false){_info_screen._memory_stash_render[array_length(_info_screen._memory_stash_render)] = self;};
+				};
+			}else{
+				if(array_length(_memory_styles) != 0){
+					var found = false;
+					var i = 0; var n = array_length(_info_screen._memory_stash_render);
+					repeat(n){
+						if(_info_screen._memory_stash_render[i] = self){found = true;break;};
+					i++;
+					};
+					if(found = true){array_delete(_info_screen._memory_stash_render,i,1);};
+				};
+			};
+			var n = array_length(_memory_containers);
 	        var i = 0;
-	        repeat(p) {
+	        repeat(n) {
 	            _memory_containers[i]._method_setVisible(__visibility);
 	            i++;
 	        };
@@ -350,13 +486,50 @@ enum UI {
 	/// @function gmcs_mark_recalculate_active();
 	/// @description This command will mark all active screens for recalculation.
 	function gmcs_mark_recalculate_active(){
-	var p = array_length(global.gmcs._memory_visibles);
+	var n = array_length(global.gmcs._memory_visibles);
 	var i = 0;
-	repeat(p) {
+	repeat(n) {
 		global.gmcs._method_mark_recalculate(global.gmcs._memory_visibles[i]);
 		i++;
 	};
 };
+//////////////////////////////////////////////////////////////////////////////////////////
+	/// @function gmcs_grid_generate(container, collumns, height, collumn_gap, rows, width, row_gap, border_row, border_collumn);
+	/// @param {struct} container
+	/// @param {real} collumns
+	/// @param {real} height
+	/// @param {real} collumn_gap
+	/// @param {real} rows
+	/// @param {real} width
+	/// @param {real} row_gap
+	/// @param {bool} border_row		Should it incluede gaps from border
+	/// @param {bool} border_collumn	Should it incluede gaps from border
+	/// @description This will generate grid made of containers and returns 2D array - return[x _index][y _index]
+	function gmcs_grid_generate(__container, __xn, __xsize, __xgap, __yn, __ysize, __ygap, __xborder, __yborder) {
+	    var xcalc = (1000 / (__xgap * (__xn - 1 + (2 * __xborder)) + __xsize * __xn));
+	    var _xgap = __xgap * xcalc;
+	    var _xsize = __xsize * xcalc;
+
+	    var ycalc = (1000 / (__ygap * (__yn - 1 + (2 * __yborder)) + __ysize * __yn));
+	    var _ygap = __ygap * ycalc;
+	    var _ysize = __ysize * ycalc;
+
+	    var gen = [];
+	    var i = 0;
+	    repeat(__xn) {
+	        var xx = _xgap * (i + (1 * __xborder)) + _xsize * (i);
+	        var xxx = _xgap * (i + (1 * __xborder)) + _xsize * (i + 1);
+	        var ii = 0;
+	        repeat(__yn) {
+	            var yy = _ygap * (ii + (1 * __yborder)) + _ysize * (ii);
+	            var yyy = _ygap * (ii + (1 * __yborder)) + _ysize * (ii + 1);
+	            gen[i][ii] = new gmcs_container_relative(__container, [0, 0, 0, 0], [xx, yy, xxx, yyy]);
+	            ii++;
+	        };
+	        i++;
+	    };
+	    return gen;
+	};
 #endregion
 //======================================================================================//
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +542,9 @@ enum UI {
 	/// @param {struct} container
 	/// @description Place this in DRAW GUI, it will draw container with all its components.
 	function gmcs_draw_container(__container) {
-		if(__container._info_visible){draw_rectangle(__container._info_position[0],__container._info_position[1],__container._info_position[2],__container._info_position[3],1);}
+		if(__container._info_visible){
+			draw_rectangle(__container._info_position[0],__container._info_position[1],__container._info_position[2]-1,__container._info_position[3]-1,1);
+		};
 	    //LOOP------------------------------------------
 	    var n = array_length(__container._memory_containers);
 	    var i = 0;
@@ -380,11 +555,11 @@ enum UI {
 	};
 //////////////////////////////////////////////////////////////////////////////////////////
 	/// @function gmcs_draw_visible();
-	/// @description Place this in DRAW GUI, it will draw container with all its components.
+	/// @description Place this in DRAW GUI, it will draw all currently visible container with all its components.
 	function gmcs_draw_visible() {
-		var p = array_length(global.gmcs._memory_visibles);
+		var n = array_length(global.gmcs._memory_visibles);
 		var i = 0;
-		repeat(p) {
+		repeat(n) {
 			gmcs_draw_container(global.gmcs._memory_visibles[i]);
 			i++;
 		};

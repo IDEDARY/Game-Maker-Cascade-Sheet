@@ -433,8 +433,8 @@ function ui_container_create(_parent, x1_solid, y1_solid, x2_solid, y2_solid, x1
 	ui_func_container_position_settings(container,0,1,0,0,0);
 
     //INDEX CONTAINER TO PARENT ARRAY
-    var p = array_length(_parent.ui_inventory.containers);
-    _parent.ui_inventory.containers[p] = container;
+    var n = array_length(_parent.ui_inventory.containers);
+    _parent.ui_inventory.containers[n] = container;
 	ui_process_recalculate_add(container);
     ui_func_declare_canvas(container.ui_info._index, container.ui_info._depth);
     return container;
@@ -468,8 +468,8 @@ function ui_container_solid_create(_parent, width, height, x_anchor, y_anchor, s
     };
 
     //INDEX CONTAINER TO PARENT ARRAY
-    var p = array_length(_parent.ui_inventory.containers);
-    _parent.ui_inventory.containers[p] = container;
+    var n = array_length(_parent.ui_inventory.containers);
+    _parent.ui_inventory.containers[n] = container;
     ui_process_recalculate_add(container);
     ui_func_declare_canvas(container.ui_info._index, container.ui_info._depth);
     return container;
@@ -492,9 +492,9 @@ function ui_container_visible(container, visibility) {
         };
 
         //LOOP------------------------------------------
-        var p = array_length(ui_inventory.containers);
+        var n = array_length(ui_inventory.containers);
         var i = 0;
-        repeat(p) {
+        repeat(n) {
             ui_container_visible(ui_inventory.containers[i], ui_visibility.itself);
             i++;
         };
@@ -710,8 +710,8 @@ function ui_element_create(container, x_relative, y_relative,type_resize, type_s
     element.ui_element.container_y_scale = y_scale;
     ui_element_recalculate(element);
 
-    var p = array_length(container.ui_inventory.elements);
-    container.ui_inventory.elements[p] = element;
+    var n = array_length(container.ui_inventory.elements);
+    container.ui_inventory.elements[n] = element;
 
     return element;
 };
