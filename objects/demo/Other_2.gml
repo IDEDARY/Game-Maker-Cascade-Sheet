@@ -1,5 +1,5 @@
 gmcs_init();
-_screen = new gmcs_screen();
+_screen = new gmcs_container_screen();
 var _container = new gmcs_container_relative(_screen,[0,0,0,0],[100,100,900,900]);
 container = new gmcs_container_solid(_container,[1,1],[UI.anchor_center, UI.anchor_center],UI.scale_fit);
 
