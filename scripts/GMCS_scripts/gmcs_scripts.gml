@@ -144,6 +144,61 @@
 				_alpha = 1;
 
 			};
+				
+			_inherit_getPositionRelative = function(__container,__position){
+				var xsc = (__container._info_parent._info_width) / 1000;
+				var ysc = (__container._info_parent._info_height) / 1000;
+				var x1 = __container._memory_positions[__position][0][0] + __container._memory_positions[__position][1][0] * xsc;
+				var y1 = __container._memory_positions[__position][0][1] + __container._memory_positions[__position][1][1] * ysc;
+				var x2 = __container._memory_positions[__position][0][2] + __container._memory_positions[__position][1][2] * xsc;
+				var y2 = __container._memory_positions[__position][0][3] + __container._memory_positions[__position][1][3] * ysc;
+				
+				return [
+				__container._info_parent._info_position[0] + x1,
+				__container._info_parent._info_position[1] + y1,
+				__container._info_parent._info_position[0] + x2,
+				__container._info_parent._info_position[1] + y2,
+				];
+			
+			};
+			_inherit_getPositionSolid = function(__container,__position){
+				var _width = __container._memory_positions[__position][0][0];
+				var _height = __container._memory_positions[__position][0][1];
+				if (__container._memory_positions[__position][3] = UI.scale_fit) {var sc = gmcs_getscale_fit(__container._info_parent, _width, _height);} else { var sc = gmcs_getscale_fill(__container._info_parent, _width, _height);};
+				_width *= sc/2;
+				_height *= sc/2;
+				var array = [
+		        __container._info_parent._info_x - _width,
+		        __container._info_parent._info_y - _height,
+		        __container._info_parent._info_x + _width,
+		        __container._info_parent._info_y + _height,
+				];
+				switch(__container._memory_positions[__position][1][0]){
+					case UI.anchor_left:
+						var c = (__container._info_parent._info_position[0] - array[0])*__container._memory_positions[__position][2][0];
+						array[0] += c;
+						array[2] += c;
+						break;
+					case UI.anchor_right:
+						var c = (__container._info_parent._info_position[0] - array[0])*__container._memory_positions[__position][2][0];
+						array[0] -= c;
+						array[2] -= c;
+						break;
+				};
+				switch(__container._memory_positions[__position][1][1]){
+					case UI.anchor_bottom:
+						var c = (__container._info_parent._info_position[1] - array[1])*__container._memory_positions[__position][2][1];
+						array[1] -= c;
+						array[3] -= c;
+						break;
+					case UI.anchor_top:
+						var c = (__container._info_parent._info_position[1] - array[1])*__container._memory_positions[__position][2][1];
+						array[1] += c;
+						array[3] += c;
+						break;
+				};
+				return array;
+			};
 			
 			_inherit_setVisible = function(__container, __visibility){
 				__container._info_selfVisible = __visibility;
@@ -325,25 +380,12 @@
 			//-------------------------------
 			//--METHODS--
 			static _method_recalculate = function(){
-				//This will recalculate the container
-				var xsc = (_info_parent._info_width) / 1000;
-				var ysc = (_info_parent._info_height) / 1000;
-				//Use matrix next time
-				var x1_vector_1 = _memory_positions[_animation_positionIndex[0]][0][0] + _memory_positions[_animation_positionIndex[0]][1][0] * xsc;
-				var y1_vector_1 = _memory_positions[_animation_positionIndex[0]][0][1] + _memory_positions[_animation_positionIndex[0]][1][1] * ysc;
-				var x2_vector_1 = _memory_positions[_animation_positionIndex[0]][0][2] + _memory_positions[_animation_positionIndex[0]][1][2] * xsc;
-				var y2_vector_1 = _memory_positions[_animation_positionIndex[0]][0][3] + _memory_positions[_animation_positionIndex[0]][1][3] * ysc;
-				
-				var x1_vector_2 = _memory_positions[_animation_positionIndex[1]][0][0] + _memory_positions[_animation_positionIndex[1]][1][0] * xsc;
-				var y1_vector_2 = _memory_positions[_animation_positionIndex[1]][0][1] + _memory_positions[_animation_positionIndex[1]][1][1] * ysc;
-				var x2_vector_2 = _memory_positions[_animation_positionIndex[1]][0][2] + _memory_positions[_animation_positionIndex[1]][1][2] * xsc;
-				var y2_vector_2 = _memory_positions[_animation_positionIndex[1]][0][3] + _memory_positions[_animation_positionIndex[1]][1][3] * ysc;
-				
-				_info_position[0] = _info_parent._info_position[0] + x1_vector_1 + (x1_vector_2 - x1_vector_1) * _animation_merge;
-				_info_position[1] = _info_parent._info_position[1] + y1_vector_1 + (y1_vector_2 - y1_vector_1) * _animation_merge;
-				_info_position[2] = _info_parent._info_position[0] + x2_vector_1 + (x2_vector_2 - x2_vector_1) * _animation_merge;
-				_info_position[3] = _info_parent._info_position[1] + y2_vector_1 + (y2_vector_2 - y2_vector_1) * _animation_merge;
-
+				var _v1 = global.gmcs._inherit_getPositionRelative(self,_animation_positionIndex[0]);
+				var _v2 = global.gmcs._inherit_getPositionRelative(self,_animation_positionIndex[1]);
+				_info_position[0] = lerp(_v1[0],_v2[0],_animation_merge);
+				_info_position[1] = lerp(_v1[1],_v2[1],_animation_merge);
+				_info_position[2] = lerp(_v1[2],_v2[2],_animation_merge);
+				_info_position[3] = lerp(_v1[3],_v2[3],_animation_merge);
 				_info_width = _info_position[2] - _info_position[0];
 				_info_height = _info_position[3] - _info_position[1];
 				_info_x = _info_position[0]+_info_width/2;
@@ -351,7 +393,7 @@
 			};
 			static _method_setVisible = function(__visibility){
 				global.gmcs._inherit_setVisible(self, __visibility);
-			}
+			};
 			static _method_addStyle = function(__style = {}) {
 				global.gmcs._inherit_addStyle(self, __style);
 			};
@@ -402,58 +444,18 @@
 			//--METHODS--
 			static _method_recalculate = function(){
 				//This will recalculate the container
-				var type_1 = _memory_positions[_animation_positionIndex[0]][3];
-				var width_1 = _memory_positions[_animation_positionIndex[0]][0][0];
-				var height_1 = _memory_positions[_animation_positionIndex[0]][0][1];
-				if (type_1 = UI.scale_fit) {var sc = gmcs_getscale_fit(_info_parent, width_1, height_1);} else {var sc = gmcs_getscale_fill(_info_parent, width_1, height_1);};
-				width_1 *= sc;
-				height_1 *= sc;
-			
-				var type_2 = _memory_positions[_animation_positionIndex[1]][3];
-				var width_2 = _memory_positions[_animation_positionIndex[1]][0][0];
-				var height_2 = _memory_positions[_animation_positionIndex[1]][0][1];
-				if (type_2 = UI.scale_fit) {var sc = gmcs_getscale_fit(_info_parent, width_2, height_2);} else { var sc = gmcs_getscale_fill(_info_parent, width_2, height_2);};
-				width_2 *= sc;
-				height_2 *= sc;
-			
-		        _info_position[0] = _info_parent._info_x - (width_1 + (width_2-width_1) * _animation_merge) / 2;
-		        _info_position[1] = _info_parent._info_y - (height_1 + (height_2-height_1) * _animation_merge) / 2;
-		        _info_position[2] = _info_parent._info_x + (width_1 + (width_2-width_1) * _animation_merge) / 2;
-		        _info_position[3] = _info_parent._info_y + (height_1 + (height_2-height_1) * _animation_merge) / 2;
+				var _v1 = global.gmcs._inherit_getPositionSolid(self,_animation_positionIndex[0]);
+				var _v2 = global.gmcs._inherit_getPositionSolid(self,_animation_positionIndex[1]);
 				
-		        _info_width = _info_position[2] - _info_position[0];
+				_info_position[0] = lerp(_v1[0],_v2[0],_animation_merge);
+				_info_position[1] = lerp(_v1[1],_v2[1],_animation_merge);
+				_info_position[2] = lerp(_v1[2],_v2[2],_animation_merge);
+				_info_position[3] = lerp(_v1[3],_v2[3],_animation_merge);
+
+				_info_width = _info_position[2] - _info_position[0];
 				_info_height = _info_position[3] - _info_position[1];
 				_info_x = _info_position[0]+_info_width/2;
 				_info_y = _info_position[1]+_info_height/2;
-			
-				switch(_memory_positions[_animation_positionIndex[0]][1][0]){
-					case UI.anchor_left:
-						var c = (_info_parent._info_position[0] - _info_position[0])*_memory_positions[_animation_positionIndex[0]][2][0];
-						_info_x += c;
-						_info_position[0] += c;
-						_info_position[2] += c;
-						break;
-					case UI.anchor_right:
-						var c = (ui_info._parent.ui_info.x1 - ui_info.x1)*ui_inventory.positions[ui_animation.position_real].x_anchor_offset;
-						_info_x -= c;
-						_info_position[0] -= c;
-						_info_position[2] -= c;
-						break;
-				};
-				switch(_memory_positions[_animation_positionIndex[0]][1][1]){
-					case UI.anchor_bottom:
-						var c = (_info_parent._info_position[1] - _info_position[1])*_memory_positions[_animation_positionIndex[0]][2][1];
-						_info_y -= c;
-						_info_position[1] -= c;
-						_info_position[3] -= c;
-						break;
-					case UI.anchor_top:
-						var c = (_info_parent._info_position[1] - _info_position[1])*_memory_positions[_animation_positionIndex[0]][2][1];
-						_info_y += c;
-						_info_position[1] += c;
-						_info_position[3] += c;
-						break;
-				};
 			};
 			static _method_setVisible = function(__visibility){
 				global.gmcs._inherit_setVisible(self, __visibility);
