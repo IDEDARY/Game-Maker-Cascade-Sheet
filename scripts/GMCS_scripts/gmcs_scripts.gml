@@ -60,15 +60,14 @@
 	#region CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Init
-		/// @function gmcs_init();
-		/// @description Creates a GMCS handler object.
+		/// @description This will prepare GMCS for you, declare this only once in game_start event. All container declaration should follow in the same event.
+		/// @function gmcs_init()
+		/// @self
+		/// @return noone
 		function gmcs_init() {
 			global.gmcs = {};
 			with(global.gmcs){
-			manager = instance_create_depth(0,0,-300,GMCS_objManager,{
-				canvas_index : 0,
-				canvas : [[]],
-			});
+			manager = instance_create_depth(0,0,-300,GMCS_objManager);
 			//-------------------------------
 			//--MEMORY--
 			_memory_screens = [];
@@ -284,8 +283,10 @@
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Screen
-		/// @function gmcs_container_screen();
-		/// @description Creates a new GUI component.
+		/// @description This will create & return a "screen" type of container, it is equvalent of GM rooms, but for UI. Example: "screen_inventory", "screen_main_menu", etc.
+		/// @function gmcs_container_screen()
+		/// @self
+		/// @return struct
 		function gmcs_container_screen() constructor {
 			//-------------------------------
 			//--INFO--
@@ -348,11 +349,13 @@
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Relative
-		/// @function gmcs_container_relative(parent, solid_positions, relative_positions);
-		/// @param {struct} parent
-		/// @param {array} solid_positions
-		/// @param {array} relative_positions
-		/// @description Creates a new GUI component.
+		/// @description This will create & return a "relative" type of container, which is nested in another container refered to as "parent" and it's size is proportional to that of the parent.
+		/// @function gmcs_container_relative(parent, solid_positions, relative_positions)
+		/// @self
+		/// @param {struct} parent Container in which it should be nested
+		/// @param {array} solid_positions (x1,y1,x2,y2) - Array with 4 real values defining solid (non-proportional) positions of the bounding points of the container
+		/// @param {array} relative_positions (x1,y1,x2,y2) - Array with 4 real values defining relative (proportional) positions of the bounding points of the container (0 - 1000 = 0% - 100% size of parent)
+		/// @return struct
 		function gmcs_container_relative(__parent, __pos_solid, __pos_relative) constructor {
 			//-------------------------------
 			//--INFO--
@@ -410,12 +413,14 @@
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Solid
-		/// @function gmcs_container_solid(parent, size, anchor, scale_type);
-		/// @param {struct} parent
-		/// @param {array} size
-		/// @param {array} anchor
-		/// @param {enum} scale_type
-		/// @description Creates a new GUI component.
+		/// @description This will create & return a "solid" type of container, which is nested in another container refered to as "parent" and it's width/height ratio will always stay the same and will fit/fill that of the parent.
+		/// @function gmcs_container_solid(parent, size, anchor, scale_type)
+		/// @self
+		/// @param {struct} parent Container in which it should be nested
+		/// @param {array} size (width,height) - Array with 2 real values defining ratio of sides
+		/// @param {array} anchor (horizontal, vertical) - Array with 2 enum values defining alignment of the container. Example: "[UI.anchor_center, UI.anchor_center]"
+		/// @param {real} scale_type Enum defining overflow, either "UI.scale_fit" or "UI.scale_fill", 90% of the case you want to use "UI.scale_fit"
+		/// @return struct
 		function gmcs_container_solid(__parent, __size, __anchor, __scale_type) constructor {
 			//-------------------------------
 			//--INFO--
@@ -481,8 +486,10 @@
 	#region SCRIPT CALLS
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Mark active
-		/// @function gmcs_mark_recalculate_active();
 		/// @description This command will mark all active screens for recalculation.
+		/// @function gmcs_mark_recalculate_active()
+		/// @self
+		/// @return noone
 		function gmcs_mark_recalculate_active(){
 		var n = array_length(global.gmcs._memory_visibles);
 		var i = 0;
@@ -494,17 +501,19 @@
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Grid generation
-		/// @function gmcs_grid_generate(container, collumns, height, collumn_gap, rows, width, row_gap, border_row, border_collumn);
-		/// @param {struct} container
-		/// @param {real} collumns
-		/// @param {real} height
-		/// @param {real} collumn_gap
-		/// @param {real} rows
-		/// @param {real} width
-		/// @param {real} row_gap
-		/// @param {bool} border_row		Should it incluede gaps from border
-		/// @param {bool} border_collumn	Should it incluede gaps from border
-		/// @description This will generate grid made of containers and returns 2D array - return[x _index][y _index]
+		/// @description This will generate several relative containers in grid-like structure and returns them as 2D array - return[x _index][y _index]
+		/// @function gmcs_grid_generate(parent, collumns, height, collumn_gap, rows, width, row_gap, border_row, border_collumn);
+		/// @self
+		/// @param {struct} parent Container in which it should be nested
+		/// @param {real} collumns Number of collumns
+		/// @param {real} height Height ratio of containers
+		/// @param {real} collumn_gap Gaps size ratio between columns
+		/// @param {real} rows Number of rows
+		/// @param {real} width	Width ratio of containers
+		/// @param {real} row_gap Gaps size ratio between rows
+		/// @param {bool} border_row Should it add gaps from sides?
+		/// @param {bool} border_collumn Should it add gaps from sides?
+		/// @return array
 		function gmcs_grid_generate(__container, __xn, __xsize, __xgap, __yn, __ysize, __ygap, __xborder, __yborder) {
 		    var xcalc = (1000 / (__xgap * (__xn - 1 + (2 * __xborder)) + __xsize * __xn));
 		    var _xgap = __xgap * xcalc;
@@ -538,9 +547,11 @@
 	#region DRAW CALLS
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Draw container
-		/// @function gmcs_draw_container(container);
-		/// @param {struct} container
 		/// @description Place this in DRAW GUI, it will draw container with all its components.
+		/// @function gmcs_draw_container(container)
+		/// @self
+		/// @param {struct} container Container which you want to draw
+		/// @return noone
 		function gmcs_draw_container(__container) {
 			if(__container._info_visible){
 				draw_rectangle(__container._info_position[0],__container._info_position[1],__container._info_position[2]-1,__container._info_position[3]-1,1);
@@ -556,8 +567,10 @@
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Draw all active containers
-		/// @function gmcs_draw_visible();
 		/// @description Place this in DRAW GUI, it will draw all currently visible container with all its components.
+		/// @function gmcs_draw_visible()
+		/// @self
+		/// @return noone
 		function gmcs_draw_visible() {
 			var n = array_length(global.gmcs._memory_visibles);
 			var i = 0;
@@ -569,22 +582,24 @@
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Get scale for filling container
-		/// @function gmcs_getscale_fill(container, width, height);
-		/// @param {struct} container
-		/// @param {struct} width
-		/// @param {struct} height
-		/// @description Returns scale to fill the container
+		/// @description This will return scale value for filling a container
+		/// @function gmcs_getscale_fill(container, width, height)
+		/// @self
+		/// @param {struct} container Container in which it should be filled
+		/// @param {struct} width Width for scaling (ratio)
+		/// @param {struct} height Height for scaling (ratio)
 		function gmcs_getscale_fill(__container, __width, __height) {
 		    return max(__container._info_width/__width, __container._info_height/__height);
 		};
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Get scale for fitting container
-		/// @function gmcs_getscale_fit(container, width, height);
-		/// @param {struct} container
-		/// @param {struct} width
-		/// @param {struct} height
-		/// @description Returns scale to fit the container
+		/// @description This will return scale value for fitting a container
+		/// @function gmcs_getscale_fit(container, width, height)
+		/// @self
+		/// @param {struct} container Container in which it should be fitted
+		/// @param {struct} width Width for scaling (ratio)
+		/// @param {struct} height Height for scaling (ratio)
 		function gmcs_getscale_fit(__container, __width, __height) {
 		    return min(__container._info_width/__width, __container._info_height/__height);
 		};
