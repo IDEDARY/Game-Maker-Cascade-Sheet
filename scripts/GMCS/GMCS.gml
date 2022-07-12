@@ -1109,19 +1109,15 @@ function ui_cache_style_to_sprite(style,width,height){
 		var __x = (_x-0.5*width)*-1 + 0.5*width;
 		var __y = (_y-0.5*height)*-1 + 0.5*height;
 		
-		//better_scaling_draw_sprite(global_inventory[i].sprite,0,_xx+_x,_yy+_y,global_inventory[i].x_scale,global_inventory[i].y_scale,global_inventory[i].rotation,global_inventory[i].blend,global_inventory[i].alpha,0);
 		draw_sprite_ext(global_inventory[i].sprite,0,_xx+_x,_yy+_y,global_inventory[i].x_scale,global_inventory[i].y_scale,global_inventory[i].rotation,global_inventory[i].blend,global_inventory[i].alpha);
 		
 		if(global_inventory[i].x_mirror){
-			//better_scaling_draw_sprite(global_inventory[i].sprite,0,_xx+__x,_yy+_y,global_inventory[i].x_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].y_scale,global_inventory[i].rotation,global_inventory[i].blend,global_inventory[i].alpha,0);
 			draw_sprite_ext(global_inventory[i].sprite,0,_xx+__x,_yy+_y,global_inventory[i].x_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].y_scale,global_inventory[i].rotation*power(-1,global_inventory[i].true_mirror),global_inventory[i].blend,global_inventory[i].alpha);
 		};
 		if(global_inventory[i].y_mirror){
-			//better_scaling_draw_sprite(global_inventory[i].sprite,0,_xx+_x,_yy+__y,global_inventory[i].x_scale,global_inventory[i].y_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].rotation,global_inventory[i].blend,global_inventory[i].alpha,0);
 			draw_sprite_ext(global_inventory[i].sprite,0,_xx+_x,_yy+__y,global_inventory[i].x_scale,global_inventory[i].y_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].rotation*power(-1,global_inventory[i].true_mirror),global_inventory[i].blend,global_inventory[i].alpha);
 		};
 		if(global_inventory[i].x_mirror & global_inventory[i].y_mirror){
-			//better_scaling_draw_sprite(global_inventory[i].sprite,0,_xx+__x,_yy+__y,global_inventory[i].x_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].y_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].rotation,global_inventory[i].blend,global_inventory[i].alpha,0);
 			draw_sprite_ext(global_inventory[i].sprite,0,_xx+__x,_yy+__y,global_inventory[i].x_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].y_scale*power(-1,global_inventory[i].true_mirror),global_inventory[i].rotation,global_inventory[i].blend,global_inventory[i].alpha);
 		};
 	};

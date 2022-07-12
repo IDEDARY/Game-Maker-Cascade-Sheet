@@ -48,8 +48,8 @@
     "PhysicsWorldPixToMetres": 0.1,
   },
   "parent": {
-    "name": "GMCS",
-    "path": "GMCS.yyp",
+    "name": "Demo",
+    "path": "folders/Demo.yy",
   },
   "resourceVersion": "1.0",
   "name": "rm_demo",

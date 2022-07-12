@@ -72,7 +72,7 @@
 			//--MEMORY--
 			_memory_screens = [];
 			_memory_visibles = [];
-			_memory_interactives = [];
+			//_memory_interactives = [];
 			_callstack_recalculate = [];
 			//-------------------------------
 			//--METHODS--
@@ -126,24 +126,7 @@
 			    };
 				array_delete(_callstack_recalculate,0,array_length(_callstack_recalculate));
 			};
-			//////////////////////////////////////////////////////////////////////////////////////////
-			_constructor_newStyleDecoration = function() constructor {
-				_sprite = noone;
-				_x_relative = 0;
-				_y_relative = 0;
-				_x_solid = 0;
-				_y_solid = 0;
-				_x_scale = 1;
-				_y_scale = 1;
-				_x_mirror = 1;
-				_y_mirror = 1;
-				_true_mirror = 1; //Should the direction of the elements be also mirrored?
-				_rotation = 0;
-				_blend = c_white;
-				_alpha = 1;
-
-			};
-				
+			//////////////////////////////////////////////////////////////////////////////////////////	
 			_inherit_getPositionRelative = function(__container,__position){
 				var xsc = (__container._info_parent._info_width) / 1000;
 				var ysc = (__container._info_parent._info_height) / 1000;
@@ -258,13 +241,21 @@
 			
 			_inherit_addStyle = function(__container,_style) {
 				__container._memory_styles[array_length(__container._memory_styles)] = {
-					_sprite : surface_create(1,1),
+					_sprite : noone,
+					_surface : -1,
 					_sprite_scale : 1,
-					_sprite_reference : [noone, noone, noone],
+					_sprite_reference : [noone, noone],
 					_sprite_decoration : [],
 					_font : noone,
-					_font_blend : c_white,
+					_font_blend : [c_white,c_white,c_white,c_white],
 					_font_alpha : 1,
+					_font_size : 0.5,
+					
+					_font_halign : fa_left,
+					_font_valign : fa_center,
+					_font_margin : 12,
+					_font_hoffset : 0,
+					_font_voffset : 0,
 			
 					_spriteReturn_deco_offset : [],
 					_spriteReturn_deco_size : [],
@@ -303,6 +294,7 @@
 			//--MEMORY--
 			_memory_containers = [];
 			_memory_stash_render = [];
+			_memory_stash_animation = [];
 			//_memory_stash_interactive = [];
 			//-------------------------------
 			//--METHODS--
@@ -370,12 +362,15 @@
 			_info_type = UI.type_relative;
 			_info_visible = 1;
 			_info_selfVisible = 1;
+			_info_text = "";
 			//-------------------------------
 			//--MEMORY--
 			_memory_containers = [];
 			_memory_positions = [[__pos_solid,__pos_relative, UI.type_solid]];
-			//_memory_animation = [];
 			_memory_styles = [];
+			_cache_height = 0;
+			_cache_width = 0;
+			_callstack_animation = [];
 			//-------------------------------
 			//--ANIMATION--
 			_animation_positionIndex = [0,0];
@@ -435,12 +430,15 @@
 			_info_type = UI.type_solid;
 			_info_visible = 1;
 			_info_selfVisible = 1;
+			_info_text = "";
 			//-------------------------------
 			//--MEMORY--
 			_memory_containers = [];
 			_memory_positions = [[__size,__anchor,[1,1],__scale_type]];
-			//_memory_animation = [];
 			_memory_styles = [];
+			_cache_height = 0;
+			_cache_width = 0;
+			_callstack_animation = [];
 			//-------------------------------
 			//--ANIMATION--
 			_animation_positionIndex = [0,0];
@@ -480,6 +478,41 @@
 		};
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
+	#region Wrappers
+		/// @description You will input basic specifications and the function will return autofilled struct ready to be used by GMCS styling
+		/// @function gmcs_wrap_decoration(style)
+		/// @self
+		/// @param {struct} style struct that should be wrapped for use as a decoration in GMCS styling
+	function gmcs_wrap_decoration(_style = {}){
+		var s = {
+			_sprite : noone,
+			_relative : [0,0],
+			_solid : [0,0],
+			_x_scale : 1,
+			_y_scale : 1,
+			_x_mirror : 0,
+			_y_mirror : 0,
+			_true_mirror : 1,
+			_rotation : 0,
+			_blend : c_white,
+			_alpha : 1,
+		};
+		if(variable_struct_exists(_style,"_sprite")){s._sprite = _style._sprite;};
+		if(variable_struct_exists(_style,"_relative")){s._relative = _style._relative;};
+		if(variable_struct_exists(_style,"_solid")){s._solid = _style._solid;};
+		if(variable_struct_exists(_style,"_x_scale")){s._x_scale = _style._x_scale;};
+		if(variable_struct_exists(_style,"_y_scale")){s._y_scale = _style._y_scale;};
+		if(variable_struct_exists(_style,"_x_mirror")){s._x_mirror = _style._x_mirror;};
+		if(variable_struct_exists(_style,"_y_mirror")){s._y_mirror = _style._y_mirror;};
+		//if(variable_struct_exists(_style,"_true_mirror")){s._true_mirror = _style._true_mirror;};
+		//Currently disabled - this option is not done yet
+		if(variable_struct_exists(_style,"_rotation")){s._rotation = _style._rotation;};
+		if(variable_struct_exists(_style,"_blend")){s._blend = _style._blend;};
+		if(variable_struct_exists(_style,"_alpha")){s._alpha = _style._alpha;};
+		return s;
+	};
+	#endregion
+	//////////////////////////////////////////////////////////////////////////////////////////
 	#endregion
 	//======================================================================================//
 	//======================================================================================//
@@ -502,17 +535,17 @@
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Grid generation
 		/// @description This will generate several relative containers in grid-like structure and returns them as 2D array - return[x _index][y _index]
-		/// @function gmcs_grid_generate(parent, collumns, height, collumn_gap, rows, width, row_gap, border_row, border_collumn);
+		/// @function gmcs_grid_generate(parent, x_number, width, gap_width, y_number, height, gap_height, border_x, border_y);
 		/// @self
 		/// @param {struct} parent Container in which it should be nested
-		/// @param {real} collumns Number of collumns
+		/// @param {real} x_number Number of containers on x axis
+		/// @param {real} width Width ratio of containers
+		/// @param {real} gap_width Gaps size ratio between columns
+		/// @param {real} y_number Number of containers on y axis
 		/// @param {real} height Height ratio of containers
-		/// @param {real} collumn_gap Gaps size ratio between columns
-		/// @param {real} rows Number of rows
-		/// @param {real} width	Width ratio of containers
-		/// @param {real} row_gap Gaps size ratio between rows
-		/// @param {bool} border_row Should it add gaps from sides?
-		/// @param {bool} border_collumn Should it add gaps from sides?
+		/// @param {real} gap_height Gaps size ratio between rows
+		/// @param {bool} border_x Should it add gaps from sides?
+		/// @param {bool} border_y Should it add gaps from sides?
 		/// @return array
 		function gmcs_grid_generate(__container, __xn, __xsize, __xgap, __yn, __ysize, __ygap, __xborder, __yborder) {
 		    var xcalc = (1000 / (__xgap * (__xn - 1 + (2 * __xborder)) + __xsize * __xn));
