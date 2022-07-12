@@ -95,7 +95,7 @@ repeat(n){
 			#region Init surface
 			canvas[i][ii]._memory_styles[p]._surface = surface_create(sum_width,sum_height);
 			surface_set_target(canvas[i][ii]._memory_styles[p]._surface);
-			draw_clear_alpha(c_white,0);
+			draw_clear_alpha(c_black,0);
 			#endregion
 			
 			if(canvas[i][ii]._memory_styles[p]._sprite_reference[1] != noone){
@@ -126,11 +126,13 @@ repeat(n){
 			surface_reset_target();
 		};
 		var p = 0;
-		draw_surface_stretched(canvas[i][ii]._memory_styles[p]._surface,
+		draw_surface_stretched_ext(canvas[i][ii]._memory_styles[p]._surface,
 		canvas[i][ii]._info_position[0] - canvas[i][ii]._memory_styles[p]._spriteReturn_deco_offset[0],
 		canvas[i][ii]._info_position[1] - canvas[i][ii]._memory_styles[p]._spriteReturn_deco_offset[1],
 		canvas[i][ii]._memory_styles[p]._spriteReturn_deco_size[0],
-		canvas[i][ii]._memory_styles[p]._spriteReturn_deco_size[1]
+		canvas[i][ii]._memory_styles[p]._spriteReturn_deco_size[1],
+		c_white,
+		canvas[i][ii]._memory_styles[p]._sprite_alpha
 		);
 		if(canvas[i][ii]._memory_styles[p]._font != noone){draw_set_font(canvas[i][ii]._memory_styles[p]._font);};
 		

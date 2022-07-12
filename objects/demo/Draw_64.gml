@@ -1,1 +1,1 @@
-gmcs_draw_visible()
+if(draw) gmcs_draw_visible()

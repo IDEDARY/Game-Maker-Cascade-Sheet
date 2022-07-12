@@ -19,7 +19,7 @@
   "option_html5_usebuiltinfont": true,
   "option_html5_webgl": 2,
   "option_html5_scale": 1,
-  "option_html5_texture_page": "2048x2048",
+  "option_html5_texture_page": "4096x4096",
   "option_html5_use_facebook": false,
   "option_html5_facebook_id": "",
   "option_html5_facebook_app_display_name": "",
