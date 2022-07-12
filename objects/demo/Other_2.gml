@@ -19,10 +19,12 @@ gmcs_cursor_set_image(spr_demo_cyberpunk_cursor);
 //Declare containers (div)
 _screen = new gmcs_container_screen();
 
-container = new gmcs_container_relative(_screen,[0,0,0,0],[70,0,310,1000]);
-var _container = new gmcs_container_relative(container,[0,0,0,0],[0,350,1000,750]);
+//container = new gmcs_container_relative(_screen,[0,0,0,0],[70,0,310,1000]);
+container = new gmcs_container_solid(_screen,[807,1432],[UI.anchor_left,UI.anchor_center],UI.scale_fit)
+container._memory_positions[0][2][0] = 0.9;
+var _container = new gmcs_container_relative(container,[0,0,0,0],[100,352,900,752]);
 
-logo = new gmcs_container_relative(container,[0,0,0,0],[-150,200,1150,330]);
+logo = new gmcs_container_relative(container,[0,0,0,0],[50,200,950,330]);
 
 //Generate buttons and asign style and text to them
 _return = gmcs_grid_generate(_container,1,10,1,7,10,1,1,1);

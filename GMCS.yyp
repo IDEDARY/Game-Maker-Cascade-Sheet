@@ -13,7 +13,6 @@
     {"id":{"name":"demo","path":"objects/demo/demo.yy",},"order":0,},
     {"id":{"name":"GMCS_sprCursor","path":"sprites/GMCS_sprCursor/GMCS_sprCursor.yy",},"order":5,},
     {"id":{"name":"spr_demo_cyberpunk_button","path":"sprites/spr_demo_cyberpunk_button/spr_demo_cyberpunk_button.yy",},"order":3,},
-    {"id":{"name":"spr_demo_cyberpunk_background_test","path":"sprites/spr_demo_cyberpunk_background_test/spr_demo_cyberpunk_background_test.yy",},"order":9,},
     {"id":{"name":"fnt_demo_cyberpunk_blender","path":"fonts/fnt_demo_cyberpunk_blender/fnt_demo_cyberpunk_blender.yy",},"order":1,},
     {"id":{"name":"spr_demo_cyberpunk_button_deco","path":"sprites/spr_demo_cyberpunk_button_deco/spr_demo_cyberpunk_button_deco.yy",},"order":4,},
     {"id":{"name":"GMCS_scripts","path":"scripts/GMCS_scripts/GMCS_scripts.yy",},"order":2,},

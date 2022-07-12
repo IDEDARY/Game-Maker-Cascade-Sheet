@@ -282,6 +282,48 @@
 				if(variable_struct_exists(_style,"_font_voffset")){s._font_voffset = _style._font_voffset;};
 			};
 			
+			
+			_inherit_addGlobal_style = function(_style) {
+				var index = array_length(_memory_styles);
+				_memory_styles[index] = {
+					_sprite : noone,
+					_sprite_scale : 1,
+					_sprite_alpha : 1,
+					
+					_surface_scale : 1,
+					_surface_reference : [noone, noone],
+					_surface_decoration : [],
+					_surface_alpha : 1,
+					_font : noone,
+					_font_blend : [c_white,c_white,c_white,c_white],
+					_font_alpha : 1,
+					_font_size : 0.5,
+					
+					_font_halign : fa_center,
+					_font_margin : 0,
+					_font_hoffset : 0,
+					_font_voffset : 0,
+				};
+				var s = _memory_styles[index];
+				if(variable_struct_exists(_style,"_sprite")){s._sprite = _style._sprite;};
+				if(variable_struct_exists(_style,"_sprite_scale")){s._sprite_scale = _style._sprite_scale;};
+				if(variable_struct_exists(_style,"_sprite_alpha")){s._sprite_alpha = _style._sprite_alpha;};
+				
+				if(variable_struct_exists(_style,"_surface_scale")){s._surface_scale = _style._surface_scale;};
+				if(variable_struct_exists(_style,"_surface_reference")){s._surface_reference = _style._surface_reference;};
+				if(variable_struct_exists(_style,"_surface_decoration")){s._surface_decoration = _style._surface_decoration;};
+				if(variable_struct_exists(_style,"_surface_alpha")){s._surface_alpha = _style._surface_alpha;};
+				if(variable_struct_exists(_style,"_font")){s._font = _style._font;};
+				if(variable_struct_exists(_style,"_font_blend")){s._font_blend = _style._font_blend;};
+				if(variable_struct_exists(_style,"_font_alpha")){s._font_alpha = _style._font_alpha;};
+				if(variable_struct_exists(_style,"_font_size")){s._font_size = _style._font_size;};
+				if(variable_struct_exists(_style,"_font_halign")){s._font_halign = _style._font_halign;};
+				if(variable_struct_exists(_style,"_font_margin")){s._font_margin = _style._font_margin;};
+				if(variable_struct_exists(_style,"_font_hoffset")){s._font_hoffset = _style._font_hoffset;};
+				if(variable_struct_exists(_style,"_font_voffset")){s._font_voffset = _style._font_voffset;};
+				return index;
+			};
+			
 		};};
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
