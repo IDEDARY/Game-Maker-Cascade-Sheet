@@ -136,17 +136,29 @@ repeat(n){
 		
 		
 		var sc = gmcs_getscale_fit(canvas[i][ii],string_width(canvas[i][ii]._info_text),string_height(canvas[i][ii]._info_text));
-		var real_string_width = string_width(canvas[i][ii]._info_text)*sc;
-		//sc *= canvas[i][ii]._memory_styles[p]._font_size;
-		var ww = (canvas[i][ii]._info_x - real_string_width*0.5 + real_string_width*0.5*(1-canvas[i][ii]._memory_styles[p]._font_size) - canvas[i][ii]._memory_styles[p]._font_margin) - canvas[i][ii]._info_position[0];
-		//draw_set_halign(canvas[i][ii]._memory_styles[p]._font_halign);
-		//draw_set_valign(canvas[i][ii]._memory_styles[p]._font_valign);
-		var xx = canvas[i][ii]._info_x;
-		if(canvas[i][ii]._memory_styles[p]._font_halign = fa_left){
-		//	xx = canvas[i][ii]._info_position[0] + string_height(canvas[i][ii]._info_text)*sc;
+		switch(canvas[i][ii]._memory_styles[p]._font_halign){
+			default:
+				var xx = canvas[i][ii]._info_x;
+			break;
+			case fa_left:
+				var real_string_width = string_width(canvas[i][ii]._info_text)*sc;
+				//var real_string_height = string_height(canvas[i][ii]._info_text)*sc;
+				var xx = canvas[i][ii]._info_position[0] + real_string_width/2;
+				xx += canvas[i][ii]._memory_styles[p]._font_margin*sc;
+				//xx += (real_string_height - real_string_height*canvas[i][ii]._memory_styles[p]._font_size)*0.5;
+				xx -= real_string_width*(1-canvas[i][ii]._memory_styles[p]._font_size)*0.5;
+			break;
+			case fa_right:
+				var real_string_width = string_width(canvas[i][ii]._info_text)*sc;
+				//var real_string_height = string_height(canvas[i][ii]._info_text)*sc;
+				var xx = canvas[i][ii]._info_position[2] - real_string_width/2;
+				xx -= canvas[i][ii]._memory_styles[p]._font_margin*sc;
+				//xx -= (real_string_height - real_string_height*canvas[i][ii]._memory_styles[p]._font_size)*0.5;
+				xx += real_string_width*(1-canvas[i][ii]._memory_styles[p]._font_size)*0.5;
+			break;
 		};
 		sc *= canvas[i][ii]._memory_styles[p]._font_size;
-		draw_text_transformed_color(xx -ww+(canvas[i][ii]._memory_styles[p]._font_margin*sc/canvas[i][ii]._memory_styles[p]._font_size) + canvas[i][ii]._memory_styles[p]._font_hoffset,canvas[i][ii]._info_y + canvas[i][ii]._memory_styles[p]._font_voffset,canvas[i][ii]._info_text,sc,sc,0,canvas[i][ii]._memory_styles[p]._font_blend[0],canvas[i][ii]._memory_styles[p]._font_blend[1],canvas[i][ii]._memory_styles[p]._font_blend[2],canvas[i][ii]._memory_styles[p]._font_blend[3],canvas[i][ii]._memory_styles[p]._font_alpha);
+		draw_text_transformed_color(xx + canvas[i][ii]._memory_styles[p]._font_hoffset,canvas[i][ii]._info_y + canvas[i][ii]._memory_styles[p]._font_voffset,canvas[i][ii]._info_text,sc,sc,0,canvas[i][ii]._memory_styles[p]._font_blend[0],canvas[i][ii]._memory_styles[p]._font_blend[1],canvas[i][ii]._memory_styles[p]._font_blend[2],canvas[i][ii]._memory_styles[p]._font_blend[3],canvas[i][ii]._memory_styles[p]._font_alpha);
 	ii++;
 	};
 i++;

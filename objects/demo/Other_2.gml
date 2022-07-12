@@ -17,7 +17,7 @@ var _style1 = {
 _screen = new gmcs_container_screen();
 //_screen._method_setVisible(!_screen._info_visible);
 
-container = new gmcs_container_relative(_screen,[0,0,0,0],[100,100,400,900]);
+container = new gmcs_container_relative(_screen,[0,0,0,0],[100,100,900,900]);
 //add_postion(container,0,["0","0","0","0"],["0","100","0","0"]);
 //container._animation_positionIndex[1]=1;
 

@@ -251,9 +251,9 @@
 					_font_alpha : 1,
 					_font_size : 0.5,
 					
-					_font_halign : fa_left,
+					_font_halign : fa_right,
 					_font_valign : fa_center,
-					_font_margin : 12,
+					_font_margin : 32,
 					_font_hoffset : 0,
 					_font_voffset : 0,
 			
