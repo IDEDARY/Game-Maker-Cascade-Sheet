@@ -14,6 +14,8 @@ var _style1 = {
 	_font_margin : 32,
 };
 
+gmcs_cursor_set_image(spr_demo_cyberpunk_cursor);
+
 //Declare containers (div)
 _screen = new gmcs_container_screen();
 

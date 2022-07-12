@@ -1,0 +1,2 @@
+in_window = abs((window_get_x()+window_mouse_get_x())-display_mouse_get_x()) < 5 and abs((window_get_y()+window_mouse_get_y())-display_mouse_get_y()) < 5;
+if((in_window or _raw_cursorMode != UI.mode_mouse) and cursor_freeze = false){draw_self();};

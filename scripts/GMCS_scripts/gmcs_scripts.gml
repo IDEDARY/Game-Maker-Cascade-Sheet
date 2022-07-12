@@ -32,6 +32,8 @@
 	#region ENUMS
 	//These are inner working functions that are not supposed to be touched by user. TLDR: Don't touch anything that has in name "func" = inner function (applies to arrays and structs as well)
 	enum UI {
+		mode_mouse,
+		mode_gamepad,
 		//Anchor positions (used when scaling type_solid container)
 		anchor_center,
 		anchor_bottom,
@@ -68,6 +70,7 @@
 			global.gmcs = {};
 			with(global.gmcs){
 			manager = instance_create_depth(0,0,-300,GMCS_objManager);
+			cursor = instance_create_depth(0,0,-500,GMCS_objCursor);
 			//-------------------------------
 			//--MEMORY--
 			_memory_screens = [];
@@ -540,6 +543,19 @@
 			i++;
 		};
 	};
+	#endregion
+	//////////////////////////////////////////////////////////////////////////////////////////
+	#region Cursor set
+		/// @description This will set sprite to a cursor. Frame 1 - default, Frame 2 - default highlight,
+		/// Frame 3 - hand, Frame 4 - hand highlight, Frame 5 - gamepad, Frame 6 - gamepad highlight
+		/// @function gmcs_cursor_set_image(image_sheet)
+		/// @param {GM.sprite} image_sheet Sprite with 6 frames containing diffrent cursor versions
+		/// @self
+		/// @return noone
+		function gmcs_cursor_set_image(__sheet){
+			global.gmcs.cursor.sprite_index = __sheet;
+			window_set_cursor(cr_none);
+		}
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
 	#region Grid generation
