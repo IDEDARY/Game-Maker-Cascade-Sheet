@@ -7,3 +7,5 @@ draw_sprite_ext(spr_demo_cyberpunk_board,0,container._info_x,container._info_y,s
 var sc = gmcs_getscale_fill(logo,681,166);
 draw_sprite_ext(spr_demo_cyberpunk_logo_shadow,0,logo._info_x,logo._info_y,sc,sc,0,c_white,1);
 draw_sprite_ext(spr_demo_cyberpunk_logo,0,logo._info_x,logo._info_y,sc,sc,0,c_white,1);
+
+//draw_text(100,100, _return[0][0]._animation_styleMerge);

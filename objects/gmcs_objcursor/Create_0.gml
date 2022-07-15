@@ -1,7 +1,7 @@
 image_speed = 0;
 image_xscale = 0.4;
 image_yscale = 0.4;
-gamepad_set_axis_deadzone(0, 0.15);
+gamepad_set_axis_deadzone(0, 0.2);
 //_raw_input_clicked_primary = 0; //Left click or A button
 //_raw_input_clicked_secondary = 0;	//Right click or B button
 
