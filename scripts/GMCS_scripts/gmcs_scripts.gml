@@ -90,6 +90,34 @@
 			_memory_styles = [];
 			//-------------------------------
 			//--METHODS--
+			_method_flush_animation = function(){
+				array_delete(_feedstack_animation,0,array_length(_feedstack_animation));
+				var n = array_length(_memory_visibles);
+				var i = 0;
+				repeat(n) {
+					var nn = array_length(_memory_visibles[i]._memory_stash_animation);
+					var ii = 0;
+					repeat(nn) {
+						array_push(_feedstack_animation,_memory_visibles[i]._memory_stash_animation[ii]);
+					ii++;
+					};
+				i++;
+				};
+			};
+			_method_flush_interaction = function(){
+				array_delete(_feedstack_interaction,0,array_length(_feedstack_interaction));
+				var n = array_length(_memory_visibles);
+				var i = 0;
+				repeat(n) {
+					var nn = array_length(_memory_visibles[i]._memory_stash_interaction);
+					var ii = 0;
+					repeat(nn) {
+						array_push(_feedstack_interaction,_memory_visibles[i]._memory_stash_interaction[ii]);
+					ii++;
+					};
+				i++;
+				};
+			};
 			_method_flush_render = function(){
 				//This will push all containers from active screens onto the render array
 				manager.canvas_index = 0;
@@ -106,20 +134,6 @@
 							manager.canvas_index = array_length(manager.canvas);
 						};
 						manager.canvas[_memory_visibles[i]._memory_stash_render[ii]._info_layer][array_length(manager.canvas[_memory_visibles[i]._memory_stash_render[ii]._info_layer])] = _memory_visibles[i]._memory_stash_render[ii];
-					ii++;
-					};
-				i++;
-				};
-			};
-			_method_flush_animation = function(){
-				array_delete(_feedstack_animation,0,array_length(_feedstack_animation));
-				var n = array_length(_memory_visibles);
-				var i = 0;
-				repeat(n) {
-					var nn = array_length(_memory_visibles[i]._memory_stash_animation);
-					var ii = 0;
-					repeat(nn) {
-						array_push(_feedstack_animation,_memory_visibles[i]._memory_stash_animation[ii]);
 					ii++;
 					};
 				i++;
@@ -170,16 +184,19 @@
 							_feedstack_animation[i]._animation_styleIndex = [memory._end_style,memory._start_style];
 						};
 					};
-					if(anim._remaining_duration <= 0){
+					if(anim._remaining_duration <= 0 && memory._pesistent = false){
 						memory._finish_method(_feedstack_animation[i]);
 						//_feedstack_animation[i]._animation_invert = !_feedstack_animation[i]._animation_invert;
 						array_delete(_feedstack_animation[i]._callstack_animation,0,1);
 						continue;
 					};
 					var percentage = anim._remaining_duration/memory._duration;
-					if(percentage >= memory._interrupt){_feedstack_animation[i]._animation_reverse = 1;}else{_feedstack_animation[i]._animation_reverse = power(-1,!_feedstack_animation[i]._animation_trigger);};
+					if(percentage <= memory._interrupt){
+						_feedstack_animation[i]._animation_reverse = 1;
+					}else{_feedstack_animation[i]._animation_reverse = power(-1,!_feedstack_animation[i]._animation_trigger);};
 					
-					anim._remaining_duration -= global.gmcs.time_delta * _feedstack_animation[i]._animation_reverse;
+					anim._remaining_duration += -global.gmcs.time_delta * _feedstack_animation[i]._animation_reverse;
+					anim._remaining_duration = clamp(anim._remaining_duration,0,memory._duration);
 					var pos_percentage = animcurve_channel_evaluate(animcurve_get_channel(memory._position_easing_asset, memory._position_easing_index),percentage);
 					var stl_percentage = animcurve_channel_evaluate(animcurve_get_channel(memory._style_easing_asset, memory._style_easing_index),percentage);
 					if(_feedstack_animation[i]._animation_invert){_feedstack_animation[i]._animation_positionMerge = 1-pos_percentage;}else{_feedstack_animation[i]._animation_positionMerge = pos_percentage;};
@@ -188,11 +205,24 @@
 				};
 			
 			};
+			_method_process_interaction = function(){
+				var i = 0;
+				var n = array_length(_feedstack_interaction);
+				repeat(n){
+					if(	(_feedstack_interaction[i]._info_position[0] < global.gmcs.cursor.x && global.gmcs.cursor.x < _feedstack_interaction[i]._info_position[2]) && 
+						(_feedstack_interaction[i]._info_position[1] < global.gmcs.cursor.y && global.gmcs.cursor.y < _feedstack_interaction[i]._info_position[3])){
+						_feedstack_interaction[i]._interaction_method_inside(_feedstack_interaction[i]);
+					}else{
+						_feedstack_interaction[i]._interaction_method_outside(_feedstack_interaction[i]);
+					};
+				i++;
+				};
+			};
 			_method_process_render = function(c){
-				if(c._info_width != c._cache_width or c._info_height != c._cache_height or c._cache_styleMerge != c._animation_styleMerge){
-					c._cache_width = c._info_width;
-					c._cache_height = c._info_height;
-					c._cache_styleMerge = c._animation_styleMerge;
+				if(c._info_width != c._render_width or c._info_height != c._render_height or c._render_style_merge != c._animation_styleMerge or (!surface_exists(c._memory_styles[c._animation_styleIndex[0]]._surface) or !surface_exists(c._memory_styles[c._animation_styleIndex[1]]._surface))){
+					c._render_width = c._info_width;
+					c._render_height = c._info_height;
+					c._render_style_merge = c._animation_styleMerge;
 					
 					var p = 0;
 					repeat(2){
@@ -304,22 +334,22 @@
 						#region Calculate font
 						if(c._memory_styles[c._animation_styleIndex[p]]._get_font() != noone){draw_set_font(c._memory_styles[c._animation_styleIndex[p]]._get_font());};
 						
-						var sc = gmcs_getscale_fit(c,string_width(c._info_text),string_height(c._info_text));
+						var sc = gmcs_getscale_fit(c,string_width(c._render_text),string_height(c._render_text));
 						switch(c._memory_styles[c._animation_styleIndex[p]]._get_font_halign()){
 							default:
 								var xx = c._info_x;
 							break;
 							case fa_left:
-								var real_string_width = string_width(c._info_text)*sc;
-								//var real_string_height = string_height(c._info_text)*sc;
+								var real_string_width = string_width(c._render_text)*sc;
+								//var real_string_height = string_height(c._render_text)*sc;
 								var xx = c._info_position[0] + real_string_width/2;
 								xx += c._memory_styles[c._animation_styleIndex[p]]._get_font_margin()*sc;
 								//xx += (real_string_height - real_string_height*c._memory_styles[c._animation_styleIndex[p]]._font_size)*0.5;
 								xx -= real_string_width*(1-c._memory_styles[c._animation_styleIndex[p]]._get_font_size())*0.5;
 							break;
 							case fa_right:
-								var real_string_width = string_width(c._info_text)*sc;
-								//var real_string_height = string_height(c._info_text)*sc;
+								var real_string_width = string_width(c._render_text)*sc;
+								//var real_string_height = string_height(c._render_text)*sc;
 								var xx = c._info_position[2] - real_string_width/2;
 								xx -= c._memory_styles[c._animation_styleIndex[p]]._get_font_margin()*sc;
 								//xx -= (real_string_height - real_string_height*c._memory_styles[c._animation_styleIndex[p]]._font_size)*0.5;
@@ -340,15 +370,15 @@
 					
 					var b1 = c._memory_styles[c._animation_styleIndex[0]]._get_font_blend();
 					var b2 = c._memory_styles[c._animation_styleIndex[1]]._get_font_blend();
-					c._info_style._font_blend[0] = merge_color(b1[0],b2[0],c._animation_styleMerge);
-					c._info_style._font_blend[1] = merge_color(b1[1],b2[1],c._animation_styleMerge);
-					c._info_style._font_blend[2] = merge_color(b1[2],b2[2],c._animation_styleMerge);
-					c._info_style._font_blend[3] = merge_color(b1[3],b2[3],c._animation_styleMerge);
-					c._info_style._font_alpha = lerp(c._memory_styles[c._animation_styleIndex[0]]._get_font_alpha(),c._memory_styles[c._animation_styleIndex[1]]._get_font_alpha(),c._animation_styleMerge);
+					c._render_style._font_blend[0] = merge_color(b1[0],b2[0],c._animation_styleMerge);
+					c._render_style._font_blend[1] = merge_color(b1[1],b2[1],c._animation_styleMerge);
+					c._render_style._font_blend[2] = merge_color(b1[2],b2[2],c._animation_styleMerge);
+					c._render_style._font_blend[3] = merge_color(b1[3],b2[3],c._animation_styleMerge);
+					c._render_style._font_alpha = lerp(c._memory_styles[c._animation_styleIndex[0]]._get_font_alpha(),c._memory_styles[c._animation_styleIndex[1]]._get_font_alpha(),c._animation_styleMerge);
 					
-					c._info_style._font_x = lerp(c._memory_styles[c._animation_styleIndex[0]]._font_x,c._memory_styles[c._animation_styleIndex[1]]._font_x,c._animation_styleMerge);
-					c._info_style._font_y = lerp(c._memory_styles[c._animation_styleIndex[0]]._font_y,c._memory_styles[c._animation_styleIndex[1]]._font_y,c._animation_styleMerge);
-					c._info_style._font_scale = lerp(c._memory_styles[c._animation_styleIndex[0]]._font_scale,c._memory_styles[c._animation_styleIndex[1]]._font_scale,c._animation_styleMerge);
+					c._render_style._font_x = lerp(c._memory_styles[c._animation_styleIndex[0]]._font_x,c._memory_styles[c._animation_styleIndex[1]]._font_x,c._animation_styleMerge);
+					c._render_style._font_y = lerp(c._memory_styles[c._animation_styleIndex[0]]._font_y,c._memory_styles[c._animation_styleIndex[1]]._font_y,c._animation_styleMerge);
+					c._render_style._font_scale = lerp(c._memory_styles[c._animation_styleIndex[0]]._font_scale,c._memory_styles[c._animation_styleIndex[1]]._font_scale,c._animation_styleMerge);
 				};
 				var p = 0;
 				repeat(2){
@@ -362,7 +392,7 @@
 					);
 				p++;
 				};
-				draw_text_transformed_color(c._info_style._font_x,c._info_style._font_y,c._info_text,c._info_style._font_scale,c._info_style._font_scale,0,c._info_style._font_blend[0],c._info_style._font_blend[1],c._info_style._font_blend[2],c._info_style._font_blend[3],c._info_style._font_alpha);
+				draw_text_transformed_color(c._render_style._font_x,c._render_style._font_y,c._render_text,c._render_style._font_scale,c._render_style._font_scale,0,c._render_style._font_blend[0],c._render_style._font_blend[1],c._render_style._font_blend[2],c._render_style._font_blend[3],c._render_style._font_alpha);
 			};
 			//////////////////////////////////////////////////////////////////////////////////////////	
 			_inherit_get_position_relative = function(__container,__position){
@@ -420,10 +450,10 @@
 				return array;
 			};
 			
-			_inherit_setVisible = function(__container, __visibility){
-				__container._info_selfVisible = __visibility;
-				__container._info_visible = __container._info_parent._info_visible && __container._info_selfVisible;
-				if(__container._info_visible = 1){
+			_inherit_set_visible = function(__container, __visibility){
+				__container._info_visible_self = __visibility;
+				__container._info_visible_real = __container._info_parent._info_visible_real && __container._info_visible_self;
+				if(__container._info_visible_real = 1){
 					global.gmcs._method_mark_recalculate(__container);
 					if(array_length(__container._memory_styles) != 0){
 						var found = false;
@@ -452,17 +482,17 @@
 					i++;
 		        };
 			};
-			_inherit_addPosition_solid = function(__container, __pos_solid, __pos_relative) {
+			_inherit_add_position_solid = function(__container, __pos_solid, __pos_relative) {
 				var i = array_length(__container._memory_positions);
 			    __container._memory_positions[i] = [__pos_solid, __pos_relative, UI.type_solid];
 			    return i;
 			};
-			_inherit_addPosition_relative = function(__container, __pos_solid, __pos_relative, __target) {
+			_inherit_add_position_relative = function(__container, __pos_solid, __pos_relative, __target) {
 				var i = array_length(__container._memory_positions);
 			    __container._memory_positions[i] = [__pos_solid, __pos_relative, UI.type_relative, __target];
 			    return i;
 			};
-			_inherit_addPositionFrom_solid = function(__container, __position, __pos_solid, __pos_relative){
+			_inherit_add_position_solid_from = function(__container, __position, __pos_solid, __pos_relative){
 				//------------------------
 				// HOW TO USE!! -- If you enter REAL value, it will overwrite it, If you enter STRING value, it will add to it. Ex. "0" for keeping the same value.
 				//------------------------
@@ -474,7 +504,7 @@
 				if(is_string(__pos_relative[1])){var _x2_r = __container._memory_positions[__position][1][1]+real(__pos_relative[1]);}else{var _x2_r = __pos_relative[1];};
 				if(is_string(__pos_relative[2])){var _y1_r = __container._memory_positions[__position][1][2]+real(__pos_relative[2]);}else{var _y1_r = __pos_relative[2];};
 				if(is_string(__pos_relative[3])){var _y2_r = __container._memory_positions[__position][1][3]+real(__pos_relative[3]);}else{var _y2_r = __pos_relative[3];};
-			    return _inherit_addPosition_solid(__container,[_x1_s,_x2_s,_y1_s,_y2_s],[_x1_r,_x2_r,_y1_r,_y2_r]);
+			    return _inherit_add_position_solid(__container,[_x1_s,_x2_s,_y1_s,_y2_s],[_x1_r,_x2_r,_y1_r,_y2_r]);
 			};
 			
 			_inherit_emptyFunction = function(_self){};
@@ -594,6 +624,7 @@
 					_end_position : 0,
 					_duration : 100,
 					_interrupt : 0,
+					_pesistent : 0,
 					_finish_method : global.gmcs._inherit_emptyFunction,
 					_position_easing_asset : GMCS_smoothing,
 					_position_easing_index : 0,
@@ -605,6 +636,8 @@
 				if(variable_struct_exists(__animation,"_start_position")){__container._memory_animation[index]._start_position = __animation._start_position;};
 				if(variable_struct_exists(__animation,"_end_position")){__container._memory_animation[index]._end_position = __animation._end_position;};
 				if(variable_struct_exists(__animation,"_duration")){__container._memory_animation[index]._duration = __animation._duration;};
+				if(variable_struct_exists(__animation,"_interrupt")){__container._memory_animation[index]._interrupt = __animation._interrupt;};
+				if(variable_struct_exists(__animation,"_pesistent")){__container._memory_animation[index]._pesistent = __animation._pesistent;};
 				if(variable_struct_exists(__animation,"_finish_method")){__container._memory_animation[index]._finish_method = __animation._finish_method;};
 				if(variable_struct_exists(__animation,"_position_easing_asset")){__container._memory_animation[index]._position_easing_asset = __animation._position_easing_asset;};
 				if(variable_struct_exists(__animation,"_position_easing_index")){__container._memory_animation[index]._position_easing_index = __animation._position_easing_index;};
@@ -634,8 +667,7 @@
 					_remaining_duration : __container._memory_animation[__animation]._duration,
 				};
 			};
-			_inherit_set_interaction = function(__container){
-			
+			_inherit_set_interaction = function(__container,__interaction_inside,__interaction_outside){
 				//Register itself into the screen interaction stash
 				var n = array_length(__container._info_screen._memory_stash_interaction);
 			    var i = 0;
@@ -646,7 +678,8 @@
 			    };
 				if(found = -1){__container._info_screen._memory_stash_interaction[n] = __container};
 				
-			
+				__container._interaction_method_inside = __interaction_inside;
+				__container._interaction_method_outside = __interaction_outside;
 			};
 		};};
 	#endregion
@@ -666,7 +699,7 @@
 			_info_y = global.screen_height/2;
 			_info_layer = 0;
 			_info_type = UI.type_screen;
-			_info_visible = 0;
+			_info_visible_real = 0;
 			_info_screen = self;
 			//-------------------------------
 			//--MEMORY--
@@ -687,7 +720,7 @@
 			};
 			static _method_setVisible = function(__visibility){
 				//This will set visibility of a container
-				_info_visible = __visibility;
+				_info_visible_real = __visibility;
 				var n = array_length(global.gmcs._memory_visibles);
 			    var i = 0;
 				var found = -1;
@@ -695,7 +728,7 @@
 			        if(global.gmcs._memory_visibles[i] = self){found = i;break;};
 			        i++;
 			    };
-				if(_info_visible = 1){
+				if(_info_visible_real = 1){
 					if(found = -1){global.gmcs._memory_visibles[array_length(global.gmcs._memory_visibles)] = self;};
 					global.gmcs._method_mark_recalculate(self);
 				} else {
@@ -709,7 +742,7 @@
 		        };
 			};
 			_method_recalculate();
-			_method_setVisible(_info_visible);
+			_method_setVisible(_info_visible_real);
 			//-------------------------------
 			//--PROCESSING--
 			_processing_doneRecalculated = 0;
@@ -739,29 +772,17 @@
 			_info_screen = __parent._info_screen;
 			_info_layer = _info_parent._info_layer + 1;
 			_info_type = UI.type_relative;
-			_info_visible = 1;
-			_info_selfVisible = 1;
-			_info_text = "";
-			
-			_info_style = {
-				_font : noone,
-				_font_blend : [c_white,c_white,c_white,c_white],
-				_font_alpha : 1,
-				_font_scale : 1,
-				_font_x : 0,
-				_font_y : 0,
-			};
-			
+			_info_visible_real = 1;
+			_info_visible_self = 1;
 			//-------------------------------
 			//--MEMORY--
 			_memory_containers = [];
 			_memory_positions = [[__pos_solid,__pos_relative, UI.type_solid]];
-			_memory_styles = [];
-			_cache_height = 0;
-			_cache_width = 0;
-			
 			_memory_animation = [];
-			_callstack_animation = [];
+			//-------------------------------
+			//--INTERACTION--
+			_interaction_method_inside = global.gmcs._inherit_emptyFunction;
+			_interaction_method_outside = global.gmcs._inherit_emptyFunction;
 			//-------------------------------
 			//--ANIMATION--
 			_animation_positionIndex = [0,0];
@@ -769,8 +790,26 @@
 			_animation_positionMerge = 0;
 			_animation_styleMerge = 0;
 			_animation_trigger = 0;
-			_animation_invert = 0;
+			_animation_invert = 0; //Not needed anymore
 			_animation_reverse = 1; // 1 or -1 depending if trigger is on or off.
+
+			_callstack_animation = [];
+			//-------------------------------
+			//--RENDER--
+			_memory_styles = [];
+			
+			_render_height = 0;
+			_render_width = 0;
+			_render_style_merge = 0;
+			_render_text = "";
+			_render_style = {
+				_font : noone,
+				_font_blend : [c_white,c_white,c_white,c_white],
+				_font_alpha : 1,
+				_font_scale : 1,
+				_font_x : 0,
+				_font_y : 0,
+			};
 			//-------------------------------
 			//--METHODS--
 			static _method_recalculate = function(){
@@ -786,14 +825,14 @@
 				_info_y = _info_position[1]+_info_height/2;
 			};
 			static _method_setVisible = function(__visibility){
-				global.gmcs._inherit_setVisible(self, __visibility);
+				global.gmcs._inherit_set_visible(self, __visibility);
 			};
 			static _method_addStyle = function(__style = {}) {
 				global.gmcs._inherit_add_localStyle(self, __style);
 			};
 		
 			_method_recalculate();
-			_method_setVisible(_info_visible);
+			_method_setVisible(_info_visible_real);
 			//-------------------------------
 			//--PROCESSING--
 			_processing_doneRecalculated = 0;
@@ -824,11 +863,37 @@
 			_info_screen = __parent._info_screen;
 			_info_layer = _info_parent._info_layer + 1;
 			_info_type = UI.type_solid;
-			_info_visible = 1;
-			_info_selfVisible = 1;
-			_info_text = "";
+			_info_visible_real = 1;
+			_info_visible_self = 1;
+			//-------------------------------
+			//--MEMORY--
+			_memory_containers = [];
+			_memory_positions = [[__size,__anchor,[1,1],__scale_type]];
+			_memory_animation = [];
+			//-------------------------------
+			//--INTERACTION--
+			_interaction_method_inside = global.gmcs._inherit_emptyFunction;
+			_interaction_method_outside = global.gmcs._inherit_emptyFunction;
+			//-------------------------------
+			//--ANIMATION--
+			_animation_positionIndex = [0,0];
+			_animation_styleIndex = [0,0];
+			_animation_positionMerge = 0;
+			_animation_styleMerge = 0;
+			_animation_trigger = 0;
+			_animation_invert = 0; //Not needed anymore
+			_animation_reverse = 1; // 1 or -1 depending if trigger is on or off.
+
+			_callstack_animation = [];
+			//-------------------------------
+			//--RENDER--
+			_memory_styles = [];
 			
-			_info_style = {
+			_render_height = 0;
+			_render_width = 0;
+			_render_style_merge = 0;
+			_render_text = "";
+			_render_style = {
 				_font : noone,
 				_font_blend : [c_white,c_white,c_white,c_white],
 				_font_alpha : 1,
@@ -836,20 +901,6 @@
 				_font_x : 0,
 				_font_y : 0,
 			};
-			//-------------------------------
-			//--MEMORY--
-			_memory_containers = [];
-			_memory_positions = [[__size,__anchor,[1,1],__scale_type]];
-			_memory_styles = [];
-			_cache_height = 0;
-			_cache_width = 0;
-			
-			_memory_animation = [];
-			_callstack_animation = [];
-			//-------------------------------
-			//--ANIMATION--
-			_animation_positionIndex = [0,0];
-			_animation_positionMerge = 0;
 			//-------------------------------
 			//--METHODS--
 			static _method_recalculate = function(){
@@ -868,14 +919,14 @@
 				_info_y = _info_position[1]+_info_height/2;
 			};
 			static _method_setVisible = function(__visibility){
-				global.gmcs._inherit_setVisible(self, __visibility);
+				global.gmcs._inherit_set_visible(self, __visibility);
 			}
 			static _method_addStyle = function(__style = {}) {
 				global.gmcs._inherit_add_localStyle(self, __style);
 			};
 			
 			_method_recalculate();
-			_method_setVisible(_info_visible);
+			_method_setVisible(_info_visible_real);
 			//-------------------------------
 			//--PROCESSING--
 			_processing_doneRecalculated = 0;
@@ -929,6 +980,9 @@
 	};
 	function gmcs_call_animation(_container, _animation){
 		global.gmcs._inherit_call_animation(_container,_animation);
+	};
+	function gmcs_set_interaction(_container,_interaction_inside = global.gmcs._inherit_emptyFunction,_interaction_outside = global.gmcs._inherit_emptyFunction){
+		global.gmcs._inherit_set_interaction(_container,_interaction_inside,_interaction_outside);
 	};
 	#endregion
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -1018,7 +1072,7 @@
 		/// @param {struct} container Container which you want to draw
 		/// @return noone
 		function gmcs_draw_container(__container) {
-			if(__container._info_visible){
+			if(__container._info_visible_real){
 				draw_rectangle(__container._info_position[0],__container._info_position[1],__container._info_position[2]-1,__container._info_position[3]-1,1);
 			};
 		    //LOOP------------------------------------------

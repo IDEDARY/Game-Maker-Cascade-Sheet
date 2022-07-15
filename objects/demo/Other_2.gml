@@ -36,39 +36,44 @@ var __container = new gmcs_container_relative(container,[0,0,0,0],[100,352,900,7
 logo = new gmcs_container_relative(container,[0,0,0,0],[50,200,950,330]);
 
 _return = gmcs_grid_generate(__container,1,10,1,7,10,1,1,1);
+
+var func_in = function(_self){
+	_self._animation_trigger = true;
+};
+var func_out = function(_self){
+	_self._animation_trigger = false;
+};
+var func_quit = function(_self){
+	_self._animation_trigger = true;
+	if(mouse_check_button_pressed(mb_any)){game_end();};
+};
+	
 var text = ["CONTINUE","NEW GAME","LOAD GAME","SETTINGS","ADDITIONAL CONTENT","CREDITS","QUIT GAME"];
+var funcs = [func_in,func_in,func_in,func_in,func_in,func_in,func_quit];
+
 
 for(var i = 0; i < array_length(_return); i++){
 	for(var ii = 0; ii < array_length(_return[i]); ii++){
-		global.gmcs._inherit_addPositionFrom_solid(_return[i][ii],0,["10","0","15","0"],["0","0","0","0"]);
+		global.gmcs._inherit_add_position_solid_from(_return[i][ii],0,["5","0","5","0"],["0","0","0","0"]);
+		_return[i][ii]._render_text = text[i+ii];
+		
 		gmcs_add_localStyle(_return[i][ii],_style1);
 		gmcs_add_localStyle(_return[i][ii],_style2);
-		_return[i][ii]._info_text = text[i+ii];
 		
 		gmcs_add_animation(_return[i][ii],{
 			_end_position : 1,
 			_end_style : 1,
-			_interrupt : 0,
-			_duration : 30,
-			_finish_method : function(_self){
-				gmcs_call_animation(_self, 1);
-			},
-		});
-		gmcs_add_animation(_return[i][ii],{
-			_start_position : 1,
-			_start_style : 1,
-			_end_position : 0,
-			_end_style : 0,
-			_interrupt : 0,
-			_duration : 100,
-			_finish_method : function(_self){
-				gmcs_call_animation(_self, 0);
-			},
+			_pesistent : true,
+			_interrupt : -1,
+			_duration : 10,
 		});
 		gmcs_call_animation(_return[i][ii], 0);
+		
+		gmcs_set_interaction(_return[i][ii],funcs[i+ii],func_out);
 	};
 };
 
 _screen._method_setVisible(1);
 global.gmcs._method_flush_render();
+global.gmcs._method_flush_interaction();
 global.gmcs._method_flush_animation();
