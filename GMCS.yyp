@@ -41,8 +41,8 @@
     {"roomId":{"name":"rm_demo","path":"rooms/rm_demo/rm_demo.yy",},},
   ],
   "Folders": [
-    {"folderPath":"folders/Basic.yy","order":3,"resourceVersion":"1.0","name":"Basic","tags":[],"resourceType":"GMFolder",},
-    {"folderPath":"folders/Basic/GMCS.yy","order":1,"resourceVersion":"1.0","name":"GMCS","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/OLD_dont_use.yy","order":3,"resourceVersion":"1.0","name":"OLD_dont_use","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/OLD_dont_use/GMCS.yy","order":1,"resourceVersion":"1.0","name":"GMCS","tags":[],"resourceType":"GMFolder",},
     {"folderPath":"folders/GMCS_new.yy","order":4,"resourceVersion":"1.0","name":"GMCS_new","tags":[],"resourceType":"GMFolder",},
     {"folderPath":"folders/Demo.yy","order":11,"resourceVersion":"1.0","name":"Demo","tags":[],"resourceType":"GMFolder",},
   ],
